@@ -1,0 +1,166 @@
+.header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 10px 50px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Logo Section */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    /* background-color: #1E2751; */
+}
+
+.logo {
+    height: 40px;
+    width: 40px;
+    object-fit: fill;
+    border-radius: 25px;
+    background-color: #1E2751;
+}
+
+/* Gradient Text Hover Effect */
+.website-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1E2751;
+    margin: 0;
+    background: none;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #1E2751;
+    transition: all 0.5s ease;
+}
+
+.website-name:hover {
+    background: linear-gradient(to right, #1E2751, #ff6347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    background-position: 0 0;
+    cursor: pointer;
+}
+
+/* Navigation Section */
+.nav-section {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: #1E2751;
+    font-size: 16px;
+    font-weight: 600;
+    position: relative;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+.nav-links li a::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #ff6347;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-links li a:hover {
+    color: #ff6347;
+}
+
+.nav-links li a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+/* Dropdown Arrow */
+.dropdown-icon {
+    margin-left: 1px;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect for the dropdown icon */
+.nav-links li a:hover .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* User Options Section */
+.user-options {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 25px;
+    /* background-color: aqua; */
+}
+
+/* Icons Inside Circle */
+.icon-circle {
+    height: 40px;
+    width: 40px;
+    background-color: #d2cfcf;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.icon-circle .icon {
+    color: #1E2751;
+    font-size: 18px;
+}
+
+.icon-circle:hover {
+    background: linear-gradient(to right, #1E2751, #ff6347);
+}
+
+.icon-circle:hover .icon {
+    color: white;
+}
+
+/* Sign In Button */
+.signin-btn {
+    background-color: #1E2751;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.user-icon {
+    font-size: 18px;
+}
+
+.signin-btn:hover {
+    background: linear-gradient(to right, #1E2751, #ff6347);
+}
