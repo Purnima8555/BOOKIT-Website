@@ -194,30 +194,29 @@ const CartPage = () => {
             </div>
 
             <div className="lg:w-96">
-  <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-8">
-    <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
-    <div className="space-y-4">
-      <div className="flex justify-between text-gray-600">
-        <span>Subtotal</span>
-        <span>${subtotal.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-between text-gray-600">
-        <span>Tax (8%)</span>
-        <span>${tax.toFixed(2)}</span>
-      </div>
-      <div className="border-t border-gray-100 pt-4">
-        <div className="flex justify-between text-xl font-bold text-gray-800">
-          <span>Total</span>
-          <span>${total.toFixed(2)}</span>
-        </div>
-      </div>
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-        Checkout Now
-      </button>
-    </div>
-  </div>
-</div>
-
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Tax (8%)</span>
+                      <span>${tax.toFixed(2)}</span>
+                    </div>
+                    <div className="border-t border-gray-100 pt-4">
+                      <div className="flex justify-between text-xl font-bold text-gray-800">
+                        <span>Total</span>
+                        <span>${total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                      Checkout Now
+                    </button>
+                  </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
