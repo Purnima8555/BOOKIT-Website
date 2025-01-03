@@ -44,7 +44,7 @@ const FavoritesPage = () => {
             {favorites.map((book) => (
               <div
                 key={book.id}
-                className="flex gap-6 p-6 rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-100"
+                className="flex gap-6 p-6 rounded-xl hover:bg-gray-50 transition-all duration-300 border border-gray-700"
               >
                 <div className="relative group">
                   <img
