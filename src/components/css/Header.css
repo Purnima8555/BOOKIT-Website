@@ -71,6 +71,7 @@
     position: relative;
     align-items: center;
     transition: color 0.3s ease;
+    display: flex;
 }
 
 .nav-links li a::after {

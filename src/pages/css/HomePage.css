@@ -10,7 +10,7 @@
 
 .image-container {
     flex: 1;
-    height: 430px;
+    height: 415px;
     overflow: hidden;
 }
 
@@ -47,7 +47,8 @@
     border-radius: 20px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    justify-content: space-around;
+    display: flex;
+    gap: 6px;
 }
 
 .hero-button:hover {
@@ -262,6 +263,7 @@
     color: #777;
 }
 
+/* New Arrival Section */
 .new-arrivals-container {
     margin-top: 40px;
     padding: 0 20px;
@@ -293,6 +295,7 @@
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
     margin: 0;
+    padding-bottom: 8px;
 }
 
 .new-arrivals::-webkit-scrollbar {
@@ -313,23 +316,24 @@
 
 .new-arrival-image {
     width: 100%;
-    height: 300px;
+    height: 250px;
     object-fit: cover;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .new-arrival-title {
     font-size: 16px;
     font-weight: bold;
     color: #1E2751;
-    margin: 8px 0 4px;
+    margin: 4px 0;
 }
 
 .new-arrival-author {
     font-size: 14px;
     color: grey;
     margin: 0;
+    line-height: 1.2;
 }
 
 .new-arrival-image-container {
@@ -424,6 +428,7 @@
     border: none;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: #4f4c4c;
 }
 
 .search-arrow-icon {
