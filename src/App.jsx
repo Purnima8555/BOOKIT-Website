@@ -5,11 +5,24 @@ import Homepage from "./pages/HomePage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import FavoritesPage from "./pages/Favorite.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import Admin from "./pages/Admin.jsx";
+import Dashboard from "./pages/Dashboard.jsx"; // Import Dashboard
+import Users from "./pages/Users.jsx";
+import Orders from "./pages/Order.jsx";
+import ManageBooks from "./pages/ManageBooks.jsx";
+import Requests from "./pages/Requests.jsx";
+import Settings from "./pages/Settings.jsx";
+import ContactUs from "./pages/ContactUs.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/loginRegister",
     element: <LoginRegister />,
+  },
+  {
+    path: "/forgotpwd",
+    element: <ForgotPassword />,
   },
   {
     path: "/",
@@ -26,6 +39,40 @@ const router = createBrowserRouter([
   {
     path: "/category",
     element: <CategoryPage />,
+  },
+  {
+    path: "/contact-us",
+    element: <ContactUs />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "users",
+        element: <Users />,
+      },
+      {
+        path: "orders",
+        element: <Orders />,
+      },
+      {
+        path: "manage-books",
+        element: <ManageBooks />,
+      },
+      {
+        path: "requests",
+        element: <Requests />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
+      },
+    ],
   },
 ]);
 
