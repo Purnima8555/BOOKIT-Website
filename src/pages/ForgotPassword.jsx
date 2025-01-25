@@ -38,11 +38,12 @@ const ForgotPassword = () => {
               className="object-cover w-full h-full"
             />
           </div>
-          <div className="login_register_container flex-1 flex items-center justify-center p-0">
-            <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md overflow-hidden m-0">
+
+          <div className="forgotpwd_container flex-2 items-center justify-center p-0">
+            <div className="bg-white border rounded-2xl shadow-lg shadow-gray-400 p-8 mb-10 w-full max-w-md">
               <div className="text-center mb-6">
-                <h2 className="text-3xl font-semibold text-[#1E2751]">Forgot Password</h2>
-                <p className="text-gray-600 text-sm mt-2">
+                <h2 className="text-3xl font-semibold text-[#1E2751] pt-5 px-6">Reset Password</h2>
+                <p className="text-gray-500 text-sm mt-2">
                   {step === 1 && "Enter your email to receive a verification code."}
                   {step === 2 && "Enter the code sent to your email."}
                   {step === 3 && "Set a new password for your account."}
@@ -141,7 +142,7 @@ const ForgotPassword = () => {
                           type="submit"
                           className="w-1/2 bg-[#1E2751] text-white py-2 rounded-3xl hover:bg-opacity-90 focus:ring-2 focus:ring-[#1E2751] transition"
                         >
-                          Reset Password
+                          Reset
                         </button>
                       </div>
                     </form>
