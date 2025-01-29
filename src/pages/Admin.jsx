@@ -69,7 +69,7 @@ const Admin = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-grow flex flex-col">
+      <div className="flex-grow flex flex-col overflow-hidden"> {/* Added overflow-hidden */}
         {/* Top Bar */}
         <div className="bg-white shadow-md p-6 flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-[#1E2751]">
@@ -90,7 +90,7 @@ const Admin = () => {
         </div>
 
         {/* Dynamic Content */}
-        <div className="p-8 flex-grow">
+        <div className="p-8 flex-grow overflow-y-auto"> {/* Added overflow-y-auto */}
           <Outlet />
         </div>
       </div>
