@@ -2,16 +2,16 @@ import React, { useState } from "react";
 
 // Sample data for settings (You can replace this with real data from an API or state)
 const initialSettings = {
+  fullName: "John Doe",
   username: "admin",
   email: "admin@example.com",
-  password: "",
-  notifications: true,
+  contactNo: "123-456-7890",
+  role: "Admin",
+  address: "123 Main Street",
 };
 
 const Settings = () => {
   const [settings, setSettings] = useState(initialSettings);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   // Handle form input change
   const handleInputChange = (e) => {
@@ -22,37 +22,36 @@ const Settings = () => {
     }));
   };
 
-  // Handle password change
-  const handlePasswordChange = () => {
-    if (newPassword === confirmPassword) {
-      setSettings((prevSettings) => ({
-        ...prevSettings,
-        password: newPassword,
-      }));
-      setNewPassword("");
-      setConfirmPassword("");
-      alert("Password updated successfully!");
-    } else {
-      alert("Passwords do not match.");
-    }
-  };
-
-  // Handle notifications toggle
-  const handleNotificationsToggle = () => {
-    setSettings((prevSettings) => ({
-      ...prevSettings,
-      notifications: !prevSettings.notifications,
-    }));
+  // Handle delete account action
+  const handleDeleteAccount = () => {
+    // Add logic to delete account (e.g., making an API call)
+    alert("Account deleted!");
   };
 
   return (
     <div className="p-8 bg-gray-50 flex-grow">
       {/* Settings Management Section */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 w-3/4 mx-auto"> {/* Adjusted width here */}
         <h3 className="text-2xl font-semibold text-[#1E2751] mb-6">Settings</h3>
 
         {/* Account Settings Form */}
         <div className="space-y-6">
+          {/* Full Name */}
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              value={settings.fullName}
+              onChange={handleInputChange}
+              className="w-full mt-2 p-3 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+            />
+          </div>
+
+          {/* Username */}
           <div>
             <label htmlFor="username" className="block text-sm font-semibold text-gray-700">
               Username
@@ -67,6 +66,7 @@ const Settings = () => {
             />
           </div>
 
+          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
               Email
@@ -81,53 +81,69 @@ const Settings = () => {
             />
           </div>
 
+          {/* Contact No. */}
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-semibold text-gray-700">
-              New Password
+            <label htmlFor="contactNo" className="block text-sm font-semibold text-gray-700">
+              Contact No.
             </label>
             <input
-              type="password"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              type="text"
+              id="contactNo"
+              name="contactNo"
+              value={settings.contactNo}
+              onChange={handleInputChange}
               className="w-full mt-2 p-3 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
             />
           </div>
 
+          {/* Role Dropdown */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700">
-              Confirm Password
+            <label htmlFor="role" className="block text-sm font-semibold text-gray-700">
+              Role
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+            <select
+              id="role"
+              name="role"
+              value={settings.role}
+              onChange={handleInputChange}
               className="w-full mt-2 p-3 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-            />
+            >
+              <option value="Admin">Admin</option>
+              <option value="User">User</option>
+            </select>
           </div>
 
-          <div className="flex items-center mt-6">
-            <input
-              type="checkbox"
-              id="notifications"
-              checked={settings.notifications}
-              onChange={handleNotificationsToggle}
-              className="h-5 w-5 text-[#1E2751] border-gray-300 rounded"
-            />
-            <label htmlFor="notifications" className="ml-3 text-sm font-semibold text-gray-700">
-              Enable Notifications
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-semibold text-gray-700">
+              Address
             </label>
+            <textarea
+              id="address"
+              name="address"
+              value={settings.address}
+              onChange={handleInputChange}
+              className="w-full mt-2 p-3 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+              rows="4"
+            />
           </div>
         </div>
 
         {/* Save Button */}
         <div className="mt-6 flex justify-end">
           <button
-            onClick={handlePasswordChange}
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
-          >
+            className="px-6 py-3 bg-[#1E2751] text-white font-semibold rounded-lg shadow-md hover:bg-[#1E2751]">
             Save Changes
+          </button>
+        </div>
+
+        {/* Delete Account Button */}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={handleDeleteAccount}
+            className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700"
+          >
+            Delete Account
           </button>
         </div>
       </div>
