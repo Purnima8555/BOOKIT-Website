@@ -14,6 +14,7 @@ import ManageBooks from "./pages/ManageBooks.jsx";
 import Requests from "./pages/Requests.jsx";
 import Settings from "./pages/Settings.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
+import DetailPage from "./pages/DetailPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/contact-us",
     element: <ContactUs />,
+  },
+  {
+    path: "/book/:bookId",
+    element: <DetailPage />,
   },
   {
     path: "/admin",
