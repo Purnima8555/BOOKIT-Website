@@ -229,50 +229,16 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="best-selling-right">
-            {[
-              {
-                title: "Atomic Habits",
-                author: "James Clear",
-                img: "/src/assets/book_images/atomichabits.jpg",
-              },
-              {
-                title: "The Alchemist",
-                author: "Paulo Coelho",
-                img: "/src/assets/book_images/thealchemist.jpg",
-              },
-              {
-                title: "1984",
-                author: "George Orwell",
-                img: "/src/assets/book_images/1984.jpg",
-              },
-            ].map((book, index) => (
-              <div className="best-selling-card" key={index}>
-                <div className="best-selling-image-container">
-                  <img
-                    src={book.img}
-                    alt={book.title}
-                    className="best-selling-image"
-                  />
-                  <div
-                    className={`fav-icon-circle ${
-                      favorites[index] ? "active" : ""
-                    }`}
-                    onClick={() => toggleFavorite(index)}
-                  >
-                    <FaHeart
-                      className={`favorite-icon ${
-                        favorites[index] ? "active" : ""
-                      }`}
-                    />
-                  </div>
-                </div>
-                <h4 className="best-selling-title">{book.title}</h4>
-                <p className="best-selling-author">{book.author}</p>
-              </div>
-            ))}
-          </div>
+          {/* Right Section - Use BookCard2 */}
+    <div className="best-selling-right">
+      {[
+        { title: "Atomic Habits", author: "James Clear", img: "/src/assets/book_images/atomichabits.jpg" },
+        { title: "The Alchemist", author: "Paulo Coelho", img: "/src/assets/book_images/thealchemist.jpg" },
+        { title: "1984", author: "George Orwell", img: "/src/assets/book_images/1984.jpg" },
+      ].map((book, index) => (
+        <BookCard2 key={index} title={book.title} author={book.author} img={book.img} />
+      ))}
+    </div>
         </div>
       </div>
 
@@ -304,19 +270,12 @@ const Homepage = () => {
         </div>
       </div>
 
-      {/* Cards Container */}
-      <div className="deal-of-the-day-container">
-        {dealBooks.map((book, index) => (
-          <div className="deal-card" key={index}>
-            <img src={book.img} alt={book.title} className="deal-image" />
-            <div className="deal-details">
-              <h4 className="deal-title">{book.title}</h4>
-              <p className="deal-author">By {book.author}</p>
-              <p className="deal-price">{book.price}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Cards Container - Using BookCard3 */}
+  <div className="deal-of-the-day-container">
+    {dealBooks.map((book, index) => (
+      <BookCard3 key={index} title={book.title} author={book.author} img={book.img} price={book.price} />
+    ))}
+  </div>
       </div>
       
       {/* Import Footer */}
