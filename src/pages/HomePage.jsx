@@ -5,6 +5,7 @@ import { FaHeart } from "react-icons/fa";
 import Header from "../components/Header.jsx";
 import "./css/Homepage.css";
 import Footer from "../components/Footer.jsx";
+import BookCard2 from "../components/BookCard2.jsx";
 
 const Homepage = () => {
   const [activeCategoryArrow, setActiveCategoryArrow] = useState("left");
@@ -188,29 +189,15 @@ const Homepage = () => {
 
         <div className="new-arrivals">
           {[
-            { title: "Atomic Habits", author: "James Clear", img: "/src/assets/book_images/atomichabits.jpg" },
-            { title: "The Alchemist", author: "Paulo Coelho", img: "/src/assets/book_images/thealchemist.jpg" },
-            { title: "1984", author: "George Orwell", img: "/src/assets/book_images/1984.jpg" },
-            { title: "To Kill a Mockingbird", author: "Harper Lee", img: "/src/assets/book_images/tokillamockingbird.jpg" },
-            { title: "The Great Gatsby", author: "F. Scott Fitzgerald", img: "/src/assets/book_images/thegreatgatsby.jpg" },
-            { title: "The Catcher in the Rye", author: "J.D. Salinger", img: "/src/assets/book_images/thecatcherintherye.jpg" },
-            { title: "Piece By Piece", author: "Tez Brooks", img: "/src/assets/book_images/piecebypiece.jpg" },
-          ].map((book, index) => (
-            <div className="new-arrival-card" key={index}>
-              <div className="new-arrival-image-container">
-                <img src={book.img} alt={book.title} className="new-arrival-image" />
-                <div
-                  className={`fav-icon-circle ${favorites[index] ? 'active' : ''}`} 
-                  onClick={() => toggleFavorite(index)}
-                >
-                  <FaHeart
-                    className={`favorite-icon ${favorites[index] ? 'active' : ''}`} 
-                  />
-                </div>
-              </div>
-              <h4 className="new-arrival-title">{book.title}</h4>
-              <p className="new-arrival-author">{book.author}</p>
-            </div>
+              { title: "Atomic Habits", author: "James Clear", img: "/src/assets/book_images/atomichabits.jpg" },
+              { title: "The Alchemist", author: "Paulo Coelho", img: "/src/assets/book_images/thealchemist.jpg" },
+              { title: "1984", author: "George Orwell", img: "/src/assets/book_images/1984.jpg" },
+              { title: "To Kill a Mockingbird", author: "Harper Lee", img: "/src/assets/book_images/tokillamockingbird.jpg" },
+              { title: "The Great Gatsby", author: "F. Scott Fitzgerald", img: "/src/assets/book_images/thegreatgatsby.jpg" },
+              { title: "The Catcher in the Rye", author: "J.D. Salinger", img: "/src/assets/book_images/thecatcherintherye.jpg" },
+              { title: "Piece By Piece", author: "Tez Brooks", img: "/src/assets/book_images/piecebypiece.jpg" },
+            ].map((book, index) => (
+    <BookCard2 key={index} title={book.title} author={book.author} img={book.img} />
           ))}
         </div>
       </div>
