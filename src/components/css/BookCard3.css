@@ -1,0 +1,45 @@
+/* Deal Card Styles */
+.deal-card {
+    display: flex;
+    min-width: 350px;
+    height: 210px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background-color: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.deal-image {
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 10px;
+}
+
+.deal-details {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.deal-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #1e2751;
+}
+
+.deal-author {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.deal-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff5733;
+}
