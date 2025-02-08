@@ -15,6 +15,7 @@ import Requests from "./pages/Requests.jsx";
 import Settings from "./pages/Settings.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
+import BookForm from "./pages/BookForm.jsx";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <Settings />,
+      },
+      {
+      path: "add-book",
+      element: <BookForm />,
       },
     ],
   },
