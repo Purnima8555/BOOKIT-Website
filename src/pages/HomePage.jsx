@@ -6,6 +6,7 @@ import Header from "../components/Header.jsx";
 import "./css/Homepage.css";
 import Footer from "../components/Footer.jsx";
 import BookCard2 from "../components/BookCard2.jsx";
+import BookCard3 from "../components/BookCard3.jsx";
 
 const Homepage = () => {
   const [activeCategoryArrow, setActiveCategoryArrow] = useState("left");
