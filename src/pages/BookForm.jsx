@@ -202,7 +202,7 @@ const BookForm = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Price ($)</label>
+              <label className="block text-sm font-semibold text-gray-700">Price (Rs.)</label>
               <input
                 type="number"
                 name="price"
@@ -216,7 +216,7 @@ const BookForm = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Rental Price ($/day)</label>
+              <label className="block text-sm font-semibold text-gray-700">Rental Price (Rs./day)</label>
               <input
                 type="number"
                 name="rental_price"
@@ -323,18 +323,14 @@ const BookForm = () => {
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700">Discount Type</label>
-                    <select
+                    <label className="block text-sm font-semibold text-gray-700">Discount Occasion</label>
+                    <input
+                      type="text"
                       name="discount_type"
                       value={formData.discount_type}
                       onChange={handleInputChange}
                       className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                      required
-                    >
-                      <option value="">Select</option>
-                      <option value="percentage">Percentage</option>
-                      <option value="flat">Flat</option>
-                    </select>
+                    />
                   </div>
 
                   <div>
@@ -384,7 +380,7 @@ const BookForm = () => {
           <div className="text-center">
             <button
               type="submit"
-              className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+              className="bg-[#1E2751] text-white px-6 py-2 rounded-md hover:bg-[#1E2751]"
             >
               Submit Book
             </button>
