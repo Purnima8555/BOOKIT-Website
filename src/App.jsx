@@ -16,6 +16,7 @@ import Settings from "./pages/Settings.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import BookForm from "./pages/BookForm.jsx";
+import BookForm2 from "./pages/BookForm2.jsx";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
       path: "add-book",
       element: <BookForm />,
+      },
+      {
+      path: "update-book/:id",
+      element: <BookForm2 />,
       },
     ],
   },
