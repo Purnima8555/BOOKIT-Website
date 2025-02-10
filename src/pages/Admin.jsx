@@ -1,8 +1,19 @@
 import React from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import { FaChartPie, FaBook, FaUser, FaTruck, FaBell, FaCog, FaSignOutAlt } from "react-icons/fa";
 
 const Admin = () => {
+  const location = useLocation(); // Get current route
+
+  const navItems = [
+    { path: "dashboard", label: "Dashboard", icon: <FaChartPie /> },
+    { path: "manage-books", label: "Manage Books", icon: <FaBook /> },
+    { path: "users", label: "Users", icon: <FaUser /> },
+    { path: "orders", label: "Orders", icon: <FaTruck /> },
+    { path: "requests", label: "Requests", icon: <FaBell /> },
+    { path: "settings", label: "Settings", icon: <FaCog /> },
+  ];
+
   return (
     <div className="flex h-screen bg-gradient-to-r from-gray-100 via-white to-gray-100">
       {/* Sidebar */}
@@ -10,7 +21,7 @@ const Admin = () => {
         {/* Sidebar Header */}
         <div className="p-6 border-b border-gray-700 flex items-center space-x-4">
           <img
-            src="/src/assets/images/no_bg_logo.png" // Replace with your logo path
+            src="/src/assets/images/no_bg_logo.png"
             alt="BookIt Logo"
             className="w-20 h-17 rounded-full border-2 border-white"
           />
@@ -20,42 +31,20 @@ const Admin = () => {
         {/* Navigation */}
         <nav className="flex-grow px-6 py-4">
           <ul className="space-y-4">
-            <li className="flex items-center py-2 px-4 bg-[#223963] rounded-lg cursor-pointer hover:bg-[#2E4A78]">
-              <FaChartPie className="text-lg mr-3" />
-              <Link to="dashboard" className="text-lg">
-                Dashboard
-              </Link>
-            </li>
-            <li className="flex items-center py-2 px-4 hover:bg-[#2E4A78] rounded-lg cursor-pointer">
-              <FaBook className="text-lg mr-3" />
-              <Link to="manage-books" className="text-lg">
-                Manage Books
-              </Link>
-            </li>
-            <li className="flex items-center py-2 px-4 hover:bg-[#2E4A78] rounded-lg cursor-pointer">
-              <FaUser className="text-lg mr-3" />
-              <Link to="users" className="text-lg">
-                Users
-              </Link>
-            </li>
-            <li className="flex items-center py-2 px-4 hover:bg-[#2E4A78] rounded-lg cursor-pointer">
-              <FaTruck className="text-lg mr-3" />
-              <Link to="orders" className="text-lg">
-                Orders
-              </Link>
-            </li>
-            <li className="flex items-center py-2 px-4 hover:bg-[#2E4A78] rounded-lg cursor-pointer">
-              <FaBell className="text-lg mr-3" />
-              <Link to="requests" className="text-lg">
-                Requests
-              </Link>
-            </li>
-            <li className="flex items-center py-2 px-4 hover:bg-[#2E4A78] rounded-lg cursor-pointer">
-              <FaCog className="text-lg mr-3" />
-              <Link to="settings" className="text-lg">
-                Settings
-              </Link>
-            </li>
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  className={`flex items-center py-2 px-4 rounded-lg cursor-pointer transition duration-200 ${
+                    location.pathname.includes(item.path)
+                      ? "bg-[#223963] text-white"
+                      : "hover:bg-[#2E4A78]"
+                  }`}
+                >
+                  {item.icon} <span className="ml-3 text-lg">{item.label}</span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -69,12 +58,10 @@ const Admin = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-grow flex flex-col overflow-hidden"> {/* Added overflow-hidden */}
+      <div className="flex-grow flex flex-col overflow-hidden">
         {/* Top Bar */}
         <div className="bg-white shadow-md p-6 flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[#1E2751]">
-            Welcome Back, Admin
-          </h2>
+          <h2 className="text-2xl font-semibold text-[#1E2751]">Welcome Back, Admin</h2>
           <div className="flex items-center space-x-6">
             <input
               type="text"
@@ -90,7 +77,7 @@ const Admin = () => {
         </div>
 
         {/* Dynamic Content */}
-        <div className="p-8 flex-grow overflow-y-auto"> {/* Added overflow-y-auto */}
+        <div className="p-8 flex-grow overflow-y-auto">
           <Outlet />
         </div>
       </div>
