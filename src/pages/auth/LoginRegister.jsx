@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { FaEnvelope, FaLock, FaPhoneAlt, FaUser } from "react-icons/fa";
-import Header from "../components/Header.jsx";
-import './css/LoginRegister.css';
+import Header from "../../components/Header.jsx";
+import '../css/LoginRegister.css';
 
 const LoginRegister = () => {
     const [action, setAction] = useState('');
