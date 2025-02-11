@@ -91,7 +91,7 @@ form .input-box {
     position: relative;
     width: 100%;
     height: 47px;
-    margin: 18px 0;
+    margin-top: 18px;
 }
 
 .input-box input {
@@ -124,7 +124,7 @@ form .remember-forgot {
     display: flex;
     justify-content: space-between;
     font-size: 11.5px;
-    margin: -15px 0 20px;
+    margin: 10px 0 20px 5px;
     color: black;
 }
 
@@ -156,6 +156,14 @@ form button {
     font-weight: 700;
 }
 
+form button:hover {
+    background-color: #151e64;
+}
+
+form button:active {
+    background-color: #1E2751;
+}
+
 form .register-link {
     font-size: 12px;
     text-align: center;
@@ -174,4 +182,13 @@ form .register-link p {
 
 .register-link p a:hover {
     text-decoration: underline;
+}
+
+.error-message {
+    color: red;
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 10px;
+    text-align: right;
+    margin-right: 20px;
 }
