@@ -1,22 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Admin from "./pages/Admin.jsx";
-import BookForm from "./pages/BookForm.jsx";
+import Admin from "./pages/admin/Admin.jsx";
+import BookForm from "./pages/admin/BookForm.jsx";
 import BookForm2 from "./pages/admin/BookForm2.jsx";
+import Dashboard from "./pages/admin/Dashboard.jsx";
 import ManageBooks from "./pages/admin/ManageBooks.jsx";
 import Orders from "./pages/admin/Order.jsx";
 import Requests from "./pages/admin/Requests.jsx";
 import Settings from "./pages/admin/Settings.jsx";
-import Users from "./pages/Users.jsx";
+import Users from "./pages/admin/Users.jsx";
+import LoginRegister from "./pages/auth/LoginRegister.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import FavoritesPage from "./pages/Favorite.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Homepage from "./pages/HomePage.jsx";
-import LoginRegister from "./pages/LoginRegister.jsx";
 
 const router = createBrowserRouter([
   {
