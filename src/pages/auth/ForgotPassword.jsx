@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaEnvelope, FaKey, FaLock } from "react-icons/fa"; // Import icons
-import Header from "../components/Header.jsx"; // Import Header
-import Footer from "../components/Footer.jsx"; // Import Footer
+import Header from "../../components/Header.jsx"; // Import Header
+import Footer from "../../components/Footer.jsx"; // Import Footer
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
