@@ -15,8 +15,9 @@ import CategoryPage from "./pages/CategoryPage.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import FavoritesPage from "./pages/Favorite.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import Homepage from "./pages/HomePage.jsx";
+import Profile from "./pages/Profile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
   {
     path: "/book/:bookId",
     element: <DetailPage />,
+  },
+  {
+    path: "profile",
+    element: <Profile />,
   },
   {
     path: "/admin",
