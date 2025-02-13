@@ -1,9 +1,30 @@
-import React from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { FaChartPie, FaBook, FaUser, FaTruck, FaBell, FaCog, FaSignOutAlt } from "react-icons/fa";
 
 const Admin = () => {
-  const location = useLocation(); // Get current route
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      axios
+        .get(`http://localhost:3000/api/customer/${userId}`)
+        .then((response) => setUser(response.data))
+        .catch((error) => console.error("Error fetching user data:", error));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    if (confirmLogout) {
+      localStorage.clear();
+      navigate("/");
+    }
+  };
 
   const navItems = [
     { path: "dashboard", label: "Dashboard", icon: <FaChartPie /> },
@@ -18,13 +39,15 @@ const Admin = () => {
     <div className="flex h-screen bg-gradient-to-r from-gray-100 via-white to-gray-100">
       {/* Sidebar */}
       <div className="w-72 bg-[#1E2751] text-white flex flex-col shadow-lg">
-        {/* Sidebar Header */}
+        {/* Sidebar Header (Clickable Logo) */}
         <div className="p-6 border-b border-gray-700 flex items-center space-x-4">
-          <img
-            src="/src/assets/images/no_bg_logo.png"
-            alt="BookIt Logo"
-            className="w-20 h-17 rounded-full border-2 border-white"
-          />
+          <Link to="/">
+            <img
+              src="/src/assets/images/no_bg_logo.png"
+              alt="BookIt Logo"
+              className="w-20 h-17 rounded-full border-2 border-white cursor-pointer transition-transform transform hover:scale-105"
+            />
+          </Link>
           <h1 className="text-2xl font-bold tracking-wide">BookIt!</h1>
         </div>
 
@@ -50,7 +73,10 @@ const Admin = () => {
 
         {/* Logout Button */}
         <div className="px-6 py-4">
-          <button className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg text-white font-semibold flex items-center justify-center shadow-md">
+          <button
+            onClick={handleLogout}
+            className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg text-white font-semibold flex items-center justify-center shadow-md"
+          >
             <FaSignOutAlt className="mr-2" />
             Logout
           </button>
@@ -68,11 +94,19 @@ const Admin = () => {
               placeholder="Search..."
               className="w-64 p-3 rounded-full bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751] text-gray-800 placeholder-gray-500"
             />
-            <img
-              src="https://via.placeholder.com/40"
-              alt="Admin Avatar"
-              className="w-12 h-12 rounded-full shadow-md"
-            />
+            {user?.image ? (
+              <img
+                src={`http://localhost:3000/profilePicture/${user.image}`}
+                alt="Admin Avatar"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-blue-500 transition-all"
+              />
+            ) : (
+              <img
+                src="https://via.placeholder.com/40"
+                alt="Admin Avatar"
+                className="w-12 h-12 rounded-full shadow-md"
+              />
+            )}
           </div>
         </div>
 
