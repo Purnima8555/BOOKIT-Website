@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
+import Select from 'react-select';
 
 const BookForm2 = () => {
     const { id } = useParams();
@@ -11,6 +12,21 @@ const BookForm2 = () => {
     const [book, setBook] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [newImage, setNewImage] = useState(null);
+
+    const genreOptions = [
+    { value: 'Art & Photography', label: 'Art & Photography' },
+    { value: 'Biography', label: 'Biography' },
+    { value: 'Business', label: 'Business' },
+    { value: 'Children', label: 'Children' },
+    { value: 'Drama', label: 'Drama' },
+    { value: 'Educational', label: 'Educational' },
+    { value: 'Fantasy', label: 'Fantasy' },
+    { value: 'Horror', label: 'Horror' },
+    { value: 'Mystery', label: 'Mystery' },
+    { value: 'Romance', label: 'Romance' },
+    { value: 'Science', label: 'Science' },
+    { value: 'Self-help', label: 'Self-help' }
+];
     
     useEffect(() => {
         if (!id) {
@@ -78,6 +94,15 @@ const BookForm2 = () => {
     }
 };
 
+    // Handle genre change
+    const handleGenreChange = (selectedGenres) => {
+        // Extract the values of the selected genres
+        const genres = selectedGenres ? selectedGenres.map((option) => option.value) : [];
+        setBook((prevBook) => ({
+            ...prevBook,
+            genre: genres,
+        }));
+    };
 
     // Handle input change and update state
     const handleInputChange = (e) => {
@@ -86,6 +111,10 @@ const BookForm2 = () => {
             ...prevBook,
             [name]: value, // Dynamically update the correct field
         }));
+    };
+
+    const handleDiscountChange = (e) => {
+        setBook({ ...book, hasDiscount: e.target.value === "yes" });
     };
 
     // Handle image change
@@ -163,18 +192,17 @@ const BookForm2 = () => {
                                 placeholder="Enter author's name"
                             />
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-semibold text-gray-700" htmlFor="genre">Genre:</label>
-                            <input
-                                type="text"
-                                id="genre"
-                                name="genre"
-                                value={book.genre}
-                                onChange={handleInputChange}
-                                className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                                placeholder="Enter book genre"
-                            />
-                        </div>
+                        {/* Genre Multi-Select Dropdown */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700">Genre:</label>
+                                <Select
+                                    options={genreOptions}
+                                    isMulti
+                                    value={genreOptions.filter(option => book.genre.includes(option.value))}
+                                    onChange={handleGenreChange}
+                                    className="mt-2"
+                                />
+                            </div>
                         <div className="mb-4">
                             <label className="block text-sm font-semibold text-gray-700" htmlFor="publisher">Publisher:</label>
                             <input
@@ -293,91 +321,85 @@ const BookForm2 = () => {
                                 />
                             </div>
                         )}
-                        {/* Discount Available */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-semibold text-gray-700">Discount Available</label>
-                            <div className="flex gap-4">
-                                <label className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        name="hasDiscount"
-                                        value="yes"
-                                        checked={book.hasDiscount === true}
-                                        onChange={handleInputChange}
-                                        className="mr-2"
-                                    />
-                                    Yes
-                                </label>
-                                <label className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        name="hasDiscount"
-                                        value="no"
-                                        checked={book.hasDiscount === false}
-                                        onChange={handleInputChange}
-                                        className="mr-2"
-                                    />
-                                    No
-                                </label>
+                        {/* Discount Section */}
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-700">Apply Discount?</label>
+                    <div className="mt-2 flex space-x-4">
+                        <label className="inline-flex items-center">
+                            <input
+                                type="radio"
+                                name="hasDiscount"
+                                value="yes"
+                                checked={book.hasDiscount === true}
+                                onChange={handleDiscountChange}
+                                className="mr-2"
+                            />
+                            Yes
+                        </label>
+                        <label className="inline-flex items-center">
+                            <input
+                                type="radio"
+                                name="hasDiscount"
+                                value="no"
+                                checked={book.hasDiscount === false}
+                                onChange={handleDiscountChange}
+                                className="mr-2"
+                            />
+                            No
+                        </label>
+                    </div>
+
+                    {/* Show discount fields only if 'Yes' is selected */}
+                    {book.hasDiscount && (
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700">Discount Type:</label>
+                                <input
+                                    type="text"
+                                    name="discount_type"
+                                    value={book.discount_type}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700">Discount Percent:</label>
+                                <input
+                                    type="number"
+                                    name="discount_percent"
+                                    value={book.discount_percent}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700">Discount Start:</label>
+                                <input
+                                    type="text"
+                                    name="discount_start"
+                                    value={book.discount_start || ""}
+                                    onChange={handleInputChange}
+                                    placeholder="mm/dd/yyyy"
+                                    className="w-full p-2 border rounded-md bg-gray-200 placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold text-gray-700">Discount End:</label>
+                                <input
+                                    type="text"
+                                    name="discount_end"
+                                    value={book.discount_end || ""}
+                                    onChange={handleInputChange}
+                                    placeholder="mm/dd/yyyy"
+                                    className="w-full p-2 border rounded-md bg-gray-200 placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+                                />
                             </div>
                         </div>
-
-                        {/* Show Discount Fields if Discount is Available */}
-                        {book.hasDiscount && (
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700">Discount Occasion</label>
-                                        <input
-                                            type="text"
-                                            name="discount_type"
-                                            value={book.discount_type}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700">Discount Percentage</label>
-                                        <input
-                                            type="number"
-                                            name="discount_percent"
-                                            value={book.discount_percent}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                                            required
-                                            min="0"
-                                            max="100"
-                                            step="0.1"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700">Discount Start Date</label>
-                                        <input
-                                            type="text"
-                                            name="discount_start"
-                                            value={book.discount_start}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700">Discount End Date</label>
-                                        <input
-                                            type="text"
-                                            name="discount_end"
-                                            value={book.discount_end}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                    )}
+                </div>
 
                         <button
                             type="submit"
