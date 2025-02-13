@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';  // You will need to install axios for making HTTP requests
+import axios from 'axios';
+import Select from 'react-select';
 
 const BookForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
-    genre: '',
+    genre: [],
     price: '',
     rental_price: '',
     publisher: '',
@@ -24,13 +25,37 @@ const BookForm = () => {
 
   const [imagePreview, setImagePreview] = useState(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const genres = [
+    "Art & Photography", "Biography", "Business", "Children", "Drama",
+    "Educational", "Fantasy", "Horror", "Mystery", "Romance", "Science", "Self-help"
+  ];
+  
+  const genreOptions = genres.map(g => ({ value: g, label: g }));
+  
+  const handleGenreChange = (selectedOptions) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      genre: selectedOptions.map(option => option.value)
     }));
   };
+
+  const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  setFormData(prev => {
+    const updatedData = { ...prev, [name]: value };
+
+    // Always recalculate rental_price when price changes
+    if (name === 'price') {
+      const priceValue = parseFloat(value);
+      if (!isNaN(priceValue)) {
+        updatedData.rental_price = Math.round(priceValue * 0.05); // Removes decimals
+      }
+    }
+
+    return updatedData;
+  });
+};
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -51,28 +76,26 @@ const BookForm = () => {
     e.preventDefault();
 
     const formDataToSend = new FormData();
-    // Append all the form fields to FormData
     for (const [key, value] of Object.entries(formData)) {
       if (key === 'image' && value) {
-        formDataToSend.append('file', value);  // Append the image file
+        formDataToSend.append('file', value);
+      } else if (key === 'genre') {
+        formDataToSend.append('genre', JSON.stringify(value)); // Send genres as JSON
       } else {
-        formDataToSend.append(key, value);  // Append other fields
+        formDataToSend.append(key, value);
       }
     }
 
     try {
       const response = await axios.post('http://localhost:3000/api/books', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // This is required for file uploads
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       console.log(response.data);
       alert('Book added successfully');
-      // You can reset the form here if you want
       setFormData({
         title: '',
         author: '',
-        genre: '',
+        genre: [],
         price: '',
         rental_price: '',
         publisher: '',
@@ -88,7 +111,7 @@ const BookForm = () => {
         discount_end: '',
         image: null
       });
-      setImagePreview(null);  // Reset image preview
+      setImagePreview(null);
     } catch (error) {
       console.error(error);
       alert('Error adding book');
@@ -154,17 +177,17 @@ const BookForm = () => {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">Genre</label>
-              <input
-                type="text"
-                name="genre"
-                value={formData.genre}
-                onChange={handleInputChange}
-                className="w-full mt-2 p-2 border rounded-md bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
-                required
-              />
-            </div>
+            {/* Genre Multi-Select */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">Genre</label>
+            <Select
+              options={genreOptions}
+              isMulti
+              value={genreOptions.filter(option => formData.genre.includes(option.value))}
+              onChange={handleGenreChange}
+              className="mt-2"
+            />
+          </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700">Publisher</label>
