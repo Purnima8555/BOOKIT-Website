@@ -21,8 +21,8 @@
 }
 
 .logo {
-    height: 45px;
-    width: 45px;
+    height: 47px;
+    width: 47px;
     object-fit: fill;
     border-radius: 25px;
     background-color: #1E2751;
@@ -30,7 +30,7 @@
 
 /* Gradient Text Hover Effect */
 .website-name {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
     color: #1E2751;
     margin: 0;
@@ -76,22 +76,18 @@
     display: flex;
 }
 
-.nav-links li a::after {
+.nav-links>li>a::after {
     content: "";
     position: absolute;
     bottom: -3px;
     left: 50%;
     width: 0;
-    height: 2px;
+    height: 3px;
     background-color: #ff6347;
     transition: width 0.3s ease, left 0.3s ease;
 }
 
-.nav-links li a:hover {
-    color: #ff6347;
-}
-
-.nav-links li a:hover::after {
+.nav-links>li>a:hover::after {
     width: 100%;
     left: 0;
 }
@@ -166,4 +162,90 @@
 
 .signin-btn:hover {
     background: linear-gradient(to right, #1E2751, #ff6347);
+}
+
+/* Dropdown Menu */
+.genre-dropdown {
+    position: relative;
+}
+
+.dropdown-icon {
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 220px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #fff;
+}
+
+.genre-dropdown {
+    position: relative;
+    padding-bottom: 5px;
+}
+
+/* Custom scrollbar for Chrome/Edge */
+.dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background-color: #8a2424;
+    border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+    background: #fff;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    transition: background 0.3s ease;
+}
+
+.dropdown-item a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-item:hover {
+    background-color: #cfcfd3;
+}
+
+/* profile pic */
+.profile-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.profile-pic {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #706c6c;
+    transition: transform 0.2s ease-in-out, border-color 0.2s ease;
+}
+
+.profile-pic:hover {
+    transform: scale(1.1);
+    border-color: #1E2751;
+    /* Blue border on hover */
 }
