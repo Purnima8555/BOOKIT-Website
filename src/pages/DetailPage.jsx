@@ -1,75 +1,181 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import { Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import { FaHeart } from 'react-icons/fa';
-import theGreatGatsby from '../assets/book_images/thegreatgatsby.jpg';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import BookCard from '../components/BookCard'; // Import BookCard
+import BookCard from '../components/BookCard';
 
 const DetailPage = () => {
-const [selectedOption, setSelectedOption] = useState('purchase');
-const [rentalDays, setRentalDays] = useState(7);
-const [quantity, setQuantity] = useState(1);
-const [rating, setRating] = useState(0);
-const [hoverRating, setHoverRating] = useState(0);
-const [review, setReview] = useState('');
-const [isFavorited, setIsFavorited] = useState(false);
+  const { id } = useParams(); // Get the book ID from the URL parameters
+  const [selectedOption, setSelectedOption] = useState('purchase');
+  const [rentalDays, setRentalDays] = useState(7);
+  const [quantity, setQuantity] = useState(1);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [review, setReview] = useState('');
+  const [reviews, setReviews] = useState([]);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [book, setBook] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userDetails, setUserDetails] = useState({});
+  const description = book?.description || '';
 
-const book = {
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    coverImage: theGreatGatsby,
-    description: "A brilliant exploration of decadence and idealism in the Roaring Twenties, this novel captures the essence of the American Dream through the mysterious Jay Gatsby's pursuit of wealth and lost love.",
-    isbn: "978-0743273565",
-    publisher: "Scribner",
-    rating: 4.5,
-    totalReviews: 1245,
-    purchasePrice: 24.99,
-    rentalPricePerDay: 0.99,
-    inStock: true,
-    genres: ["Classic Literature", "Fiction", "American Novel"]
-};
+  const toggleDescription = () => {
+    setIsExpanded(!isExpanded);
+  };
 
-const handleSubmitReview = () => {
-    if (rating === 0) {
-      alert("Please provide a rating before submitting.");
-      return;
+  // Fetch book details
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3000/api/books/${id}`)
+      .then((response) => {
+        setBook(response.data);
+        getAverageRating(); // Fetch average rating when book details are fetched
+      })
+      .catch((error) => {
+        console.error('Error fetching book details:', error);
+      });
+  }, [id]);
+
+  // Fetch average rating for the book
+  const getAverageRating = () => {
+    axios
+      .get(`http://localhost:3000/api/feedback/average-rating/${id}`) 
+      .then((response) => {
+        setAverageRating(response.data.averageRating);
+      })
+      .catch((error) => {
+        console.error('Error fetching average rating:', error);
+      });
+  };
+
+  // Fetch user details using userId from localStorage
+  useEffect(() => {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    if (userId) {
+      axios
+        .get(`http://localhost:3000/api/customer/${userId}`)
+        .then((response) => {
+          setUser(response.data); // Set user info
+        })
+        .catch((error) => {
+          console.error('Error fetching user details:', error);
+        });
     }
-    console.log("Submitted Review:", { rating, review });
-    alert("Review submitted successfully!");
-    setRating(0);
-    setReview('');
-};
-    
-const toggleFavorite = () => {
+  }, []);
+
+  const handleSubmitReview = () => {
+  if (rating === 0) {
+    alert("Please provide a rating before submitting.");
+    return;
+  }
+
+  if (!user) {
+    alert("User not found. Please log in first.");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    alert("Authentication token not found. Please log in.");
+    return;
+  }
+
+  const reviewData = {
+    user_id: user._id,
+    book_id: id,
+    rating: rating,
+    comment: review,
+  };
+
+  axios
+    .post("http://localhost:3000/api/feedback", reviewData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then(() => {
+      alert("Review submitted successfully!");
+      setRating(0);
+      setReview("");
+      getAverageRating(); // Refresh average rating
+
+      // Fetch reviews again to update the list
+      axios
+        .get(`http://localhost:3000/api/feedback/book/${id}`)
+        .then((response) => {
+          setReviews(response.data); // Update the reviews state with the new list
+        })
+        .catch((error) => {
+          console.error("Error fetching reviews:", error);
+        });
+    })
+    .catch((error) => {
+      console.error("Error submitting review:", error);
+      alert("Failed to submit review. Please try again.");
+    });
+  };
+  
+  // Fetch reviews based on book ID
+  useEffect(() => {
+  axios
+    .get(`http://localhost:3000/api/feedback/book/${id}`)
+    .then((response) => {
+      console.log(response.data); // Check what data you are receiving
+      setReviews(response.data); // Set reviews from API response
+    })
+    .catch((error) => {
+      console.error("Error fetching reviews:", error);
+    });
+  }, [id]);
+
+  // Function to render stars based on rating
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, i) => (
+      <Star key={i} fill={i < rating ? 'orange' : 'none'} stroke="orange" className="w-5 h-5" />
+    ));
+  };
+
+  const toggleFavorite = () => {
     setIsFavorited(!isFavorited);
+  };
+
+  if (!book || !user) {
+    return <div>Loading...</div>;
+  }
+
+  const getUserName = (review) => {
+  return review.user_id && review.user_id.username ? review.user_id.username : 'Anonymous';
 };
 
   return (
     <>
       <Header />
-      <div className="container mx-auto px-4 py-8 mt-10">
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
+      <div className="container mx-auto px-4 py-8 mt-3">
+        <div className="grid md:grid-cols-2 gap-4 mb-20">
           {/* Book Image Section */}
           <div className="flex flex-col items-center">
             <div className="relative">
-              <img 
-                src={book.coverImage}
-                alt={book.title} 
-                className="max-w-full h-[400px] object-cover rounded-lg shadow-lg"
-                />
+              <img
+                src={book.image ? `http://localhost:3000/book_images/${book.image}` : "/default-book-cover.jpg"}
+                alt={book.title}
+                className="max-w-full h-[450px] object-cover rounded-lg shadow-lg"
+              />
             
-            {/* Favorite Button */}
+              {/* Favorite Button */}
               <button
-                className={`absolute top-3 right-4 p-2 rounded-full border-2 transition-colors 
-                  ${isFavorited ? 'bg-white border-gray-400' : 'bg-[#1E2751] border-[#1E2751]'}
-                `}
+                className={`absolute top-3 right-4 p-2 rounded-full border-2 transition-colors
+                  ${isFavorited ? 'bg-white border-gray-400' : 'bg-[#1E2751] border-[#1E2751]'}`}
                 onClick={toggleFavorite}
               >
                 <FaHeart
-                  className={`h-6 w-6 transition-colors duration-200 
-                    ${isFavorited ? 'text-red-500' : 'text-white'}
-                  `}
+                  className={`h-6 w-6 transition-colors duration-200
+                    ${isFavorited ? 'text-red-500' : 'text-white'}`}
                 />
               </button>
             </div>
@@ -82,17 +188,17 @@ const toggleFavorite = () => {
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex text-yellow-500">
+              <div className="flex text-orange-500">
                 {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    fill={i < Math.floor(book.rating) ? 'currentColor' : 'none'} 
+                  <Star
+                    key={i}
+                    fill={i < Math.floor(averageRating) ? 'currentColor' : 'none'}
                     className="w-5 h-5"
                   />
                 ))}
               </div>
               <span className="text-gray-600">
-                ({book.rating} | {book.totalReviews} reviews)
+                ({averageRating} | {book.totalReviews} reviews)
               </span>
             </div>
 
@@ -105,26 +211,76 @@ const toggleFavorite = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">ISBN</p>
-                  <p className="font-semibold">{book.isbn}</p>
+                  <p className="font-semibold">{book.ISBN}</p>
                 </div>
-              </div>
+              
               <div className="mt-2">
                 <p className="text-sm text-gray-500">Genres</p>
                 <div className="flex gap-2 mt-1">
-                  {book.genres.map(genre => (
-                    <span 
-                      key={genre} 
-                      className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                  {book.genre.map(genre => (
+                    <span
+                      key={genre}
+                      className="bg-blue-200 font-semibold text-xs px-2 py-1 rounded text-blue-800"
                     >
                       {genre}
                     </span>
                   ))}
                 </div>
               </div>
+              {/* Availability Status */}
+              <div className="mt-3 flex items-center">
+                <p className="text-sm text-gray-500">Status:</p>
+                  <span
+                    className={`ml-2 text-xs font-semibold px-2 py-1 rounded ${
+                    book.availability_status === "yes"
+                    ? "bg-green-200 text-green-800"
+                    : "bg-red-200 text-red-800"
+                    }`}
+                    >
+                    {book.availability_status === "yes" ? "In Stock" : "Out of Stock"}
+                  </span>
+
+                  {/* Discount Tag */}
+                  {book.hasDiscount && (
+                    <span className="ml-3 text-xs font-semibold px-2 py-1 rounded bg-yellow-200 text-yellow-800">
+                      {book.discount_percent}% Off
+                    </span>
+                  )}
+              </div>
             </div>
+          </div>
 
             {/* Description */}
-            <p className="text-gray-700 mb-4">{book.description}</p>
+            <div className="relative">
+              <p
+                className={`text-gray-700 overflow-hidden ${!isExpanded ? 'line-clamp-7' : ''}`}
+                style={{ WebkitLineClamp: !isExpanded ? 7 : 'none', display: '-webkit-box', WebkitBoxOrient: 'vertical' }}
+              >
+                {description}
+              </p>
+              {/* Button to toggle full description */}
+              {!isExpanded && description.length > 200 && (
+                <div className="text-right">
+                  <button
+                    onClick={toggleDescription}
+                    className="text-blue-600 text-xs mt-1 underline"
+                  >
+                    ...Show more
+                  </button>
+                </div>
+              )}
+              
+              {isExpanded && (
+                <div className="text-right">
+                  <button
+                    onClick={toggleDescription}
+                    className="text-blue-600 text-xs mt-1 underline"
+                  >
+                    ...Show less
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Purchase/Rental Options */}
             <div className="mb-4">
@@ -137,7 +293,7 @@ const toggleFavorite = () => {
                     onChange={() => setSelectedOption('purchase')}
                     className="text-blue-600"
                   />
-                  <span>Purchase (${book.purchasePrice.toFixed(2)})</span>
+                  <span>Purchase (Rs {book.price})</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -147,7 +303,7 @@ const toggleFavorite = () => {
                     onChange={() => setSelectedOption('rent')}
                     className="text-blue-600"
                   />
-                  <span>Rent (${book.rentalPricePerDay.toFixed(2)}/day)</span>
+                  <span>Rent (Rs {book.rental_price}/day)</span>
                 </label>
               </div>
 
@@ -182,59 +338,64 @@ const toggleFavorite = () => {
           <h2 className="text-2xl font-semibold mb-4 text-center">Rate & Review</h2>
           <div className="w-4/5 mx-auto">
             <div className="flex items-center gap-3 mb-4">
-              <img 
-                src="https://via.placeholder.com/50"  
-                alt="User Profile"
+              <img
+                src={user.image ? `http://localhost:3000/profilePicture/${user.image}` : "/default-book-cover.jpg"}
+                alt={'ProfilePic'}
                 className="w-12 h-12 rounded-full border border-gray-300"
               />
               <div className="flex flex-col ml-3">
-                <p className="font-semibold">John Doe</p> 
-                <div className="flex items-center gap-1 mt-1">
+                <p className="font-semibold">{user?.username || "User"}</p>
+                <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 cursor-pointer ${i < (hoverRating || rating) ? 'text-yellow-500' : 'text-gray-300'}`}
-                      fill={i < (hoverRating || rating) ? 'currentColor' : 'none'}
+                      fill={i < hoverRating ? 'orange' : 'none'}
+                      stroke='orange'
+                      className="w-6 h-6 cursor-pointer"
                       onMouseEnter={() => setHoverRating(i + 1)}
-                      onMouseLeave={() => setHoverRating(0)}
+                      onMouseLeave={() => setHoverRating(rating)}
                       onClick={() => setRating(i + 1)}
                     />
                   ))}
-                  <p className="text-sm text-gray-500 ml-2">({rating.toFixed(1)})</p>
                 </div>
               </div>
             </div>
             <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4"
               placeholder="Write your review..."
               value={review}
               onChange={(e) => setReview(e.target.value)}
-            />
-            <div className="text-right">
-              <button
-                onClick={handleSubmitReview}
-                className="bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition"
-              >
-                Submit Review
-              </button>
-            </div>
+              className="w-full p-3 border rounded-lg mb-4"
+            ></textarea>
+            <button
+              onClick={handleSubmitReview}
+              className="bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition"
+            >
+              Submit Review
+            </button>
           </div>
         </div>
 
-        {/* Related Books Section */}
-        <div className="mt-12 bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Related Books</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {[...Array(5)].map((_, i) => (
-              <BookCard
-                key={i}
-                title={`Book Title ${i + 1}`}
-                price={`NPR ${600 + i * 50}`}
-                imageUrl={`https://placeimg.com/300/200/tech?${i}`}
-                altText={`Book ${i}`}
+        {/* Reviews Section */}
+        <div className="container mx-auto py-6 px-4" style={{ width: '90%', outline: '1px solid #E5E7EB', borderRadius: '8px' }}>
+          <h2 className="text-xl font-bold text-gray-900 mb-6 mt-4">Customer Reviews:</h2> {/* Customer Reviews Label */}
+            {reviews.map((review) => (
+          <div key={review._id} className="border-b border-gray-200 pb-8 last:border-b-0">
+            <div className="flex items-start">
+              <img
+                src={review.user_id?.image ? `http://localhost:3000/profilePicture/${review.user_id.image}` : "/default-profile.png"} // Use default if no avatar
+                alt={review.user_id?.username || "User"}
+                className="w-14 h-14 rounded-full mr-4"
               />
-            ))}
+              <div className="flex-1">
+                <div className="flex items-center mb-2">
+                  <h3 className="font-semibold text-lg text-gray-900 mr-3">{getUserName(review)}</h3>
+                    <div className="flex">{renderStars(review.rating)}</div>
+                </div>
+                  <p className="text-gray-800 text-base">{review.comment}</p>
+              </div>
+            </div>
           </div>
+          ))}
         </div>
       </div>
       <Footer />
