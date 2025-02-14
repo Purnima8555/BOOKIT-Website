@@ -7,11 +7,13 @@ import Footer from "../components/Footer.jsx";
 import BookCard2 from "../components/BookCard2.jsx";
 import BookCard3 from "../components/BookCard3.jsx";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Homepage = () => {
   const [activeCategoryArrow, setActiveCategoryArrow] = useState("left");
   const [activeArrivalArrow, setActiveArrivalArrow] = useState("left");
   const [activeDealArrow, setActiveDealArrow] = useState("left");
+  const navigate = useNavigate();
 
   // Scroll functions for categories
   const scrollLeft = () => {
@@ -217,7 +219,7 @@ const Homepage = () => {
         <div className="new-arrivals">
           {newArrivalBooks.length > 0 ? (
             newArrivalBooks.map((book, index) => (
-              <BookCard2 key={index} title={book.title} author={book.author} img={book.image} />
+              <BookCard2 key={index} title={book.title} author={book.author} img={book.image} onClick={() => navigate(`/book/${book._id}`)} />
             ))
           ) : (
             <p>Loading new arrivals...</p>
@@ -260,6 +262,7 @@ const Homepage = () => {
               title={book.title}
               author={book.author}
               img={book.image}
+              onClick={() => navigate(`/book/${book._id}`)}
               />
             ))}
           </div>
@@ -297,7 +300,7 @@ const Homepage = () => {
         </div>
 
         {/* Cards Container - Using BookCard3 */}
-        <div className="deal-of-the-day-container" id="dealbook-section">
+        <div className="discountdeal-of-the-day-container" id="discountdealbook-section">
           {dealBooks.map((book, index) => (
             <BookCard3
             key={index}
@@ -306,11 +309,12 @@ const Homepage = () => {
             img={book.image}
             price={book.price}
             discount_percent={book.discount_percent} // Pass discount_percent here
+            onClick={() => navigate(`/book/${book._id}`)}
             />
           ))}
         </div>
 
-      </div>  
+      </div>
       {/* Import Footer */}
       <Footer />
     </div>
