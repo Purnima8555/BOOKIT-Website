@@ -12,7 +12,11 @@ const BookCard2 = ({ title, author, img }) => {
   return (
     <div className="new-arrival-card">
       <div className="new-arrival-image-container">
-        <img src={img} alt={title} className="new-arrival-image" />
+        <img
+        src={img ? `http://localhost:3000/book_images/${img}` : "/default-book-cover.jpg"}
+        alt="Book Cover"
+        className="w-full h-full object-cover"
+      />
         <div
           className={`fav-icon-circle ${isFavorited ? "active" : ""}`}
           onClick={toggleFavorite}
