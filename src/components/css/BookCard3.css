@@ -1,18 +1,20 @@
 /* Deal Card Styles */
 .deal-card {
+    position: relative;
     display: flex;
-    min-width: 350px;
-    height: 210px;
+    min-width: 360px;
+    height: 220px;
     border: 2px solid #ddd;
     border-radius: 10px;
     background-color: #ffffff;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
 
 .deal-image {
-    width: 120px;
-    height: 180px;
+    width: 140px;
+    height: 193px;
     object-fit: cover;
     border-radius: 8px;
     margin: 10px;
@@ -28,8 +30,9 @@
 .deal-title {
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: #1e2751;
+    margin-top: 30px;
 }
 
 .deal-author {
@@ -39,7 +42,31 @@
 }
 
 .deal-price {
-    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.discounted-price {
+    color: #e74c3c;
     font-weight: bold;
-    color: #ff5733;
+    margin-top: 5px;
+}
+
+/* Discount Badge Styles */
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #e74c3c;
+    color: white;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 5px;
 }
