@@ -80,7 +80,7 @@ const Header = () => {
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        <a href="#category">
+                        <a href="/category">
                             Genre <FaCaretDown className="dropdown-icon" />
                         </a>
                         {isGenreOpen && (
