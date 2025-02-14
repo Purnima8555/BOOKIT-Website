@@ -49,7 +49,7 @@ const router = createBrowserRouter([
     element: <ContactUs />,
   },
   {
-    path: "/book/:bookId",
+    path: "/book/:id",
     element: <DetailPage />,
   },
   {
