@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FaHeart } from 'react-icons/fa'; // Import FaHeart from react-icons
+import { FaHeart } from 'react-icons/fa';
 
-const BookCard = ({ title, price, imageUrl, altText }) => {
+const BookCard = ({ title, price, img, altText }) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
   const toggleFavorite = () => {
@@ -9,18 +9,18 @@ const BookCard = ({ title, price, imageUrl, altText }) => {
   };
 
   return (
-    <div className="relative max-w-xs bg-white rounded-lg shadow-lg overflow-hidden h-[350px]"> 
+    <div className="relative max-w-xs bg-white rounded-lg shadow-lg overflow-hidden h-[350px]">
       {/* Increased height of the card */}
       <div className="relative">
         <img
-          src={imageUrl}
+          src={img ? `http://localhost:3000/book_images/${img}` : "/default-book-cover.jpg"}
           alt={altText}
-          className="w-full h-64 object-cover rounded-t-lg" 
-        /> 
+          className="w-full h-64 object-cover rounded-t-lg"
+        />
         {/* Increased height of the image */}
         
         <button
-          className={`absolute top-3 right-3 p-2 rounded-full border-2 
+          className={`absolute top-3 right-3 p-2 rounded-full border-2
             ${isFavorited ? 'bg-white border-gray-400' : 'bg-[#1E2751] border-[#1E2751]'}`
           }
           onClick={toggleFavorite}
