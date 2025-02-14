@@ -1,60 +1,70 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate from react-router-dom
-import { FaHeart, FaRegUserCircle, FaSearch, FaCaretUp } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaHeart, FaRegUserCircle, FaSearch, FaCaretDown } from "react-icons/fa";
 import { HiMiniShoppingBag } from "react-icons/hi2";
-import axios from "axios"; // Import axios for making API requests
+import axios from "axios";
 import "./css/Header.css";
 
 const Header = () => {
-    const navigate = useNavigate();  // Initialize the navigate function
+    const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [isGenreOpen, setIsGenreOpen] = useState(false);
+    let dropdownTimeout;
+
+    const genres = [
+        "Art & Photography", "Biography", "Business", "Children", "Drama",
+        "Educational", "Fantasy", "Horror", "Mystery", "Romance",
+        "Science", "Self-help"
+    ];
 
     useEffect(() => {
-        // Check if the user is logged in by checking localStorage for token
         const userId = localStorage.getItem("userId");
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
 
         if (userId && token && role) {
-            // User is logged in
             setIsLoggedIn(true);
-            // Fetch the user's profile data, including the profile picture
             fetchUserProfile(userId);
         } else {
-            // User is not logged in
             setIsLoggedIn(false);
         }
     }, []);
 
     const fetchUserProfile = async (userId) => {
         try {
-            // Make API request to get the user's profile data
             const response = await axios.get(`http://localhost:3000/api/customer/${userId}`);
-            setSelectedUser(response.data);  // Assuming response.data contains the user's profile data
+            setSelectedUser(response.data);
         } catch (error) {
             console.error("Error fetching user profile:", error);
-            // Optionally, handle errors or set default data
         }
     };
 
     const handleSignInClick = () => {
-        if (!isLoggedIn) {
-            navigate("/loginregister"); // Navigate to the loginregister page when not logged in
-        } else {
-            // Optionally, navigate to the user's profile page or home page
-            navigate("/profile");  // Or wherever you'd like the logged-in user to go
-        }
+        navigate(isLoggedIn ? "/profile" : "/loginregister");
     };
 
     const handleHomeClick = () => {
-        navigate("/"); // Navigate to the homepage
+        navigate("/");
+    };
+
+    // Handle mouse enter (show instantly)
+    const handleMouseEnter = () => {
+        clearTimeout(dropdownTimeout);
+        setIsGenreOpen(true);
+    };
+
+    // Handle mouse leave (delay hiding)
+    const handleMouseLeave = () => {
+        dropdownTimeout = setTimeout(() => {
+            setIsGenreOpen(false);
+        }, 200);
     };
 
     return (
         <header className="header">
             {/* Section 1: Logo */}
-            <div className="header-section logo-section">
+            <div className="header-section logo-section" onClick={handleHomeClick}>
                 <img src="/src/assets/images/no_bg_logo.png" alt="Logo" className="logo" />
                 <h1 className="website-name">BookIt!</h1>
             </div>
@@ -62,8 +72,28 @@ const Header = () => {
             {/* Section 2: Navigation */}
             <nav className="header-section nav-section">
                 <ul className="nav-links">
-                    <li><a onClick={handleHomeClick}>Home</a></li> {/* Use onClick to trigger navigate */}
-                    <li><a href="#category">Category <FaCaretUp className="dropdown-icon" /></a></li>
+                    <li><a onClick={handleHomeClick}>Home</a></li>
+
+                    {/* Genre Dropdown */}
+                    <li
+                        className="genre-dropdown"
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <a href="#category">
+                            Genre <FaCaretDown className="dropdown-icon" />
+                        </a>
+                        {isGenreOpen && (
+                            <ul className="dropdown-menu">
+                                {genres.map((genre, index) => (
+                                    <li key={index} className="dropdown-item">
+                                        <a href={`/genre/${genre.toLowerCase().replace(/ /g, "-")}`}>{genre}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </li>
+
                     <li><a href="#new">New Arrivals</a></li>
                     <li><a href="#best">Best Selling</a></li>
                     <li><a href="#contact">Contact Us</a></li>
@@ -81,31 +111,30 @@ const Header = () => {
                 <div className="icon-circle">
                     <FaHeart className="icon" />
                 </div>
-                {/* Display profile picture if logged in, otherwise show "Sign In" button */}
-                <button className="signin-btn" onClick={handleSignInClick}>
-                    {isLoggedIn && selectedUser ? (
-                        // If logged in and user data is available, display their profile picture
-                        selectedUser.image ? (
-                            <img
-                                src={
-                                    selectedUser.imagePreview
-                                        ? selectedUser.imagePreview
-                                        : `http://localhost:3000/profilePicture/${selectedUser.image}` // Fetch image from server
-                                }
-                                alt="User"
-                                className="w-10 h-10 rounded-full object-fit border-2 border-gray-300 transition-all"
-                            />
-                        ) : (
-                            // If no image, display a default profile icon
-                            <FaRegUserCircle className="user-icon" />
-                        )
+
+                {/* Show Sign In button if user is not logged in */}
+                {!isLoggedIn ? (
+                    <button className="signin-btn" onClick={handleSignInClick}>
+                        Sign In <FaRegUserCircle className="user-icon" />
+                    </button>
+                ) : (
+                // Show Profile Picture inside a div when logged in
+                <div className="profile-container" onClick={handleSignInClick}>
+                    {selectedUser?.image ? (
+                        <img
+                        src={
+                        selectedUser.imagePreview
+                            ? selectedUser.imagePreview
+                            : `http://localhost:3000/profilePicture/${selectedUser.image}`
+                        }
+                        alt="User"
+                        className="profile-pic"
+                        />
                     ) : (
-                        // If not logged in, show "Sign In" button with default icon
-                        <>
-                            Sign In <FaRegUserCircle className="user-icon" />
-                        </>
+                    <FaRegUserCircle className="user-icon" />
                     )}
-                </button>
+                </div>
+                )}
             </div>
         </header>
     );
