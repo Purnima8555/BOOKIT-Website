@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { IoBagHandle } from "react-icons/io5";
-import { FaHeart } from "react-icons/fa";
 import Header from "../components/Header.jsx";
 import "./css/Homepage.css";
 import Footer from "../components/Footer.jsx";
 import BookCard2 from "../components/BookCard2.jsx";
 import BookCard3 from "../components/BookCard3.jsx";
+import axios from "axios";
 
 const Homepage = () => {
   const [activeCategoryArrow, setActiveCategoryArrow] = useState("left");
@@ -35,17 +35,6 @@ const Homepage = () => {
     container.scrollBy({ left: 474, behavior: "smooth" });
   };
 
-  // State for handling the favorite state for each book
-  const [favorites, setFavorites] = useState({});
-
-  // Toggle the favorite state for a specific book
-  const toggleFavorite = (index) => {
-    setFavorites((prevFavorites) => ({
-      ...prevFavorites,
-      [index]: !prevFavorites[index],
-    }));
-  };
-
   // Scroll functions for the Deal of the Day section
   const scrollLeftDeal = () => {
     const container = document.querySelector(".deal-of-the-day-container");
@@ -59,13 +48,40 @@ const Homepage = () => {
     setActiveDealArrow("right");
   };
 
-  const dealBooks = [
-    { title: "The Power of Habit", author: "Charles Duhigg", price: "Rs.1499", img: "/src/assets/book_images/thepowerofhabit.jpg" },
-    { title: "Sapiens", author: "Yuval Noah Harari", price: "Rs.1899", img: "/src/assets/book_images/sapiens.jpg" },
-    { title: "Becoming", author: "Michelle Obama", price: "Rs.1699", img: "/src/assets/book_images/becoming.jpg" },
-    { title: "Educated", author: "Tara Westover", price: "Rs.1399", img: "/src/assets/book_images/educated.jpg" },
-    { title: "The Book of Love", author: "Fionnuala Kearney", price: "Rs.1599", img: "/src/assets/book_images/thebookoflove.jpg" },
-  ];
+  const [newArrivalBooks, setNewArrivals] = useState([]);
+  const [randomBooks, setRandomBooks] = useState([]);
+  const [bestSellingBooks, setBestSelling] = useState([]);
+  const [dealBooks, setDealBooks] = useState([]);
+
+  useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/books/");
+      const books = response.data;
+
+      // Get the first 3 books for Best-Selling (earliest added)
+      const bestSellingBooks = books.slice(0, 3); // First 3 books in DB
+      setBestSelling(bestSellingBooks);
+
+      // Get the last 8 books for New Arrivals
+      const latestBooks = books.slice(-8).reverse(); // Reverse to show newest first
+      setNewArrivals(latestBooks);
+
+      // Filter books that have discount set to true
+      const discountedBooks = books.filter((book) => book.hasDiscount === true);
+      setDealBooks(discountedBooks);
+
+      // Shuffle books and select 4 random ones
+      const shuffledBooks = books.sort(() => 0.5 - Math.random()).slice(0, 4);
+      setRandomBooks(shuffledBooks);
+
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   return (
     <div>
@@ -83,9 +99,14 @@ const Homepage = () => {
         <div className="content-container">
           <h1 className="hero-title">Welcome to BookIt!</h1>
           <p className="hero-text">
-            Discover, Rent, and Buy Books Effortlessly - Your Gateway to Endless Stories and Knowledge!
+            Discover, Rent and Buy Books Effortlessly - Your Gateway to Endless Stories and Knowledge!
           </p>
-          <button className="hero-button">
+          <button
+            className="hero-button"
+            onClick={() => {
+            document.getElementById("category-section").scrollIntoView({ behavior: "smooth" });
+            }}
+            >
             Explore Now <IoBagHandle fontSize={17} />
           </button>
         </div>
@@ -101,18 +122,22 @@ const Homepage = () => {
 
         {/* Lower Container: Images */}
         <div className="image-grid">
-          <img src="/src/assets/book_images/thecatcherintherye.jpg" alt="Book 1" className="grid-image" />
-          <img src="/src/assets/book_images/piecebypiece.jpg" alt="Book 2" className="grid-image" />
-          <img src="/src/assets/book_images/physics.jpg" alt="Book 3" className="grid-image" />
-          <img src="/src/assets/book_images/idiots.png" alt="Book 4" className="grid-image" />
+          {randomBooks.map((book, index) => (
+            <img
+              key={index}
+              src={`http://localhost:3000/book_images/${book.image}`}
+              alt={book.title}
+              className="grid-image"
+            />
+          ))}
         </div>
       </div>
 
       {/* Category Section */}
-      <div className="category-container">
+      <div className="category-container" id="category-section">
         {/* Top Section: Shop by Categories and Arrows */}
         <div className="category-header">
-          <span className="category-label">Shop by Categories:</span>
+          <span className="category-label">Shop by Genres:</span>
           <div className="arrow-container">
             <button
               onClick={() => {
@@ -143,7 +168,7 @@ const Homepage = () => {
             { name: "Art & Photography", img: "/src/assets/category_icons/art_photography.png", items: 25 },
             { name: "Drama", img: "/src/assets/category_icons/drama.png", items: 45 },
             { name: "Fantasy", img: "/src/assets/category_icons/fantasy.png", items: 30 },
-            { name: "Science Fiction", img: "/src/assets/category_icons/scifi.png", items: 60 },
+            { name: "Science", img: "/src/assets/category_icons/scifi.png", items: 60 },
             { name: "Horror", img: "/src/assets/category_icons/horror.png", items: 25 },
             { name: "Romance", img: "/src/assets/category_icons/romance.png", items: 50 },
             { name: "Mystery", img: "/src/assets/category_icons/mystery.png", items: 35 },
@@ -188,18 +213,15 @@ const Homepage = () => {
           </div>
         </div>
 
+        {/* Book Cards from API */}
         <div className="new-arrivals">
-          {[
-              { title: "Atomic Habits", author: "James Clear", img: "/src/assets/book_images/atomichabits.jpg" },
-              { title: "The Alchemist", author: "Paulo Coelho", img: "/src/assets/book_images/thealchemist.jpg" },
-              { title: "1984", author: "George Orwell", img: "/src/assets/book_images/1984.jpg" },
-              { title: "To Kill a Mockingbird", author: "Harper Lee", img: "/src/assets/book_images/tokillamockingbird.jpg" },
-              { title: "The Great Gatsby", author: "F. Scott Fitzgerald", img: "/src/assets/book_images/thegreatgatsby.jpg" },
-              { title: "The Catcher in the Rye", author: "J.D. Salinger", img: "/src/assets/book_images/thecatcherintherye.jpg" },
-              { title: "Piece By Piece", author: "Tez Brooks", img: "/src/assets/book_images/piecebypiece.jpg" },
-            ].map((book, index) => (
-    <BookCard2 key={index} title={book.title} author={book.author} img={book.img} />
-          ))}
+          {newArrivalBooks.length > 0 ? (
+            newArrivalBooks.map((book, index) => (
+              <BookCard2 key={index} title={book.title} author={book.author} img={book.image} />
+            ))
+          ) : (
+            <p>Loading new arrivals...</p>
+          )}
         </div>
       </div>
 
@@ -231,54 +253,64 @@ const Homepage = () => {
           </div>
 
           {/* Right Section - Use BookCard2 */}
-    <div className="best-selling-right">
-      {[
-        { title: "Atomic Habits", author: "James Clear", img: "/src/assets/book_images/atomichabits.jpg" },
-        { title: "The Alchemist", author: "Paulo Coelho", img: "/src/assets/book_images/thealchemist.jpg" },
-        { title: "1984", author: "George Orwell", img: "/src/assets/book_images/1984.jpg" },
-      ].map((book, index) => (
-        <BookCard2 key={index} title={book.title} author={book.author} img={book.img} />
-      ))}
-    </div>
+          <div className="best-selling-right">
+            {bestSellingBooks.map((book, index) => (
+              <BookCard2
+              key={index}
+              title={book.title}
+              author={book.author}
+              img={book.image}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="image-section">
-      <div className="image-content">
+        <div className="image-content">
           <p className="image-text">Whether you're a passionate reader, a book lover, or someone looking for your next great adventure,
             now is the perfect time to explore our vast collection. Don't miss out on the latest releases, bestsellers, or hidden gems that await you. </p>
-        <button className="image-button">Explore Now</button>
-      </div>
+          <button className="image-button" onClick={() => {
+            document.getElementById("dealbook-section").scrollIntoView({ behavior: "smooth" });
+          }}>Explore Now</button>
+        </div>
       </div>
 
       <div className="deal-section">
       {/* Label and Arrow Controls */}
-      <div className="deal-header">
-        <span className="deal-label">Deal of the Day:</span>
-        <div className="arrow-container">
-          <button
-            onClick={scrollLeftDeal}
-            className={`arrow-button ${activeDealArrow === "left" ? "active" : ""}`}
-          >
-            <FaArrowLeft className="arrow" />
-          </button>
-          <button
-            onClick={scrollRightDeal}
-            className={`arrow-button ${activeDealArrow === "right" ? "active" : ""}`}
-          >
-            <FaArrowRight className="arrow" />
-          </button>
+        <div className="deal-header">
+          <span className="deal-label">Deal of the Day:</span>
+            <div className="arrow-container">
+              <button
+                onClick={scrollLeftDeal}
+                className={`arrow-button ${activeDealArrow === "left" ? "active" : ""}`}
+                >
+                <FaArrowLeft className="arrow" />
+              </button>
+              <button
+                onClick={scrollRightDeal}
+                className={`arrow-button ${activeDealArrow === "right" ? "active" : ""}`}
+                >
+                <FaArrowRight className="arrow" />
+              </button>
+            </div>
         </div>
-      </div>
 
-      {/* Cards Container - Using BookCard3 */}
-  <div className="deal-of-the-day-container">
-    {dealBooks.map((book, index) => (
-      <BookCard3 key={index} title={book.title} author={book.author} img={book.img} price={book.price} />
-    ))}
-  </div>
-      </div>
-      
+        {/* Cards Container - Using BookCard3 */}
+        <div className="deal-of-the-day-container" id="dealbook-section">
+          {dealBooks.map((book, index) => (
+            <BookCard3
+            key={index}
+            title={book.title}
+            author={book.author}
+            img={book.image}
+            price={book.price}
+            discount_percent={book.discount_percent} // Pass discount_percent here
+            />
+          ))}
+        </div>
+
+      </div>  
       {/* Import Footer */}
       <Footer />
     </div>
