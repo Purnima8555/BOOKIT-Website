@@ -1,7 +1,7 @@
 import React from "react";
 import "./css/BookCard3.css";
 
-const BookCard3 = ({ title, author, img, price, discount_percent }) => {
+const BookCard3 = ({ title, author, img, price, discount_percent, onClick }) => {
 
   // Calculate discounted price
   const discountedPrice = price - (price * (discount_percent / 100));
@@ -9,6 +9,7 @@ const BookCard3 = ({ title, author, img, price, discount_percent }) => {
   return (
     <div className="deal-card">
       {/* Discount Badge */}
+      <div className="book-card3" onClick={onClick} style={{ cursor: "pointer" }}>
       {discount_percent > 0 && (
         <div className="discount-badge">{discount_percent}% OFF</div>
       )}
@@ -27,6 +28,7 @@ const BookCard3 = ({ title, author, img, price, discount_percent }) => {
           <p className="original-price">Rs{parseInt(price)}</p>
           <p className="discounted-price">Rs{parseInt(discountedPrice)}</p>
         </div>
+      </div>
       </div>
     </div>
   );
