@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
-import { FaBookOpen, FaFire, FaRegClock, FaStar } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaBookOpen, FaRegClock } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FaCamera, FaRegBuilding, FaChild, FaTheaterMasks, FaSchool, FaMagic, FaGhost, FaSearch, FaHeart, FaRocket, FaUsers } from 'react-icons/fa';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // Import Header and Footer
 import Footer from "../components/Footer.jsx";
@@ -12,16 +12,11 @@ import Header from "../components/Header.jsx";
 const CategoryPage = () => {
   const [isFilterByOpen, setIsFilterByOpen] = useState(true);
   const [isGenresOpen, setIsGenresOpen] = useState(false);
-  const [isPriceOpen, setIsPriceOpen] = useState(false);
-  const [selectedPriceOption, setSelectedPriceOption] = useState("500-1200");
-  const [priceRange, setPriceRange] = useState([500, 1200]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // Handle custom range slider change
-  const handleCustomPriceChange = (values) => {
-    setPriceRange(values);
-  };
+  const [books, setBooks] = useState([]);
+  const [sortBy, setSortBy] = useState("default");
+  const navigate = useNavigate();
 
   // Categories list
   const categories = [
@@ -35,15 +30,69 @@ const CategoryPage = () => {
     { name: 'Horror', icon: <FaGhost className="text-gray-600" size={18} /> },
     { name: 'Mystery', icon: <FaSearch className="text-teal-500" size={18} /> },
     { name: 'Romance', icon: <FaHeart className="text-red-500" size={18} /> },
-    { name: 'Science Fiction', icon: <FaRocket className="text-indigo-500" size={18} /> },
+    { name: 'Science', icon: <FaRocket className="text-indigo-500" size={18} /> },
     { name: 'Self-help', icon: <FaUsers className="text-green-600" size={18} /> },
   ];
 
+  // Fetch all books when the filter is set to "all"
+  const fetchAllBooks = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/books/");
+      setBooks(response.data);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
+
+  // Effect hook to fetch books based on selected filter
+useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/books/");
+      let filteredBooks = response.data;
+
+      // Apply filtering based on availability status
+      if (selectedFilter == "inStock") {
+        filteredBooks = filteredBooks.filter(book => book.availability_status == "yes");
+      } else if (selectedFilter == "outOfStock") {
+        filteredBooks = filteredBooks.filter(book => book.availability_status == "no");
+      }
+
+      setBooks(filteredBooks);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
+
+  fetchBooks();
+  }, [selectedFilter]);
+
+  // Add effect to reset the selectedCategory when filter changes
+  useEffect(() => {
+    setSelectedCategory(null);
+  }, [selectedFilter]);
+
   // Handle the selection of a category
-  const handleSelect = (category) => {
+  const handleSelect = async (category) => {
     setSelectedCategory(category);
     setIsGenresOpen(false);
+
+    try {
+      const response = await axios.get(`http://localhost:3000/api/books/genre/${category}`);
+      setBooks(response.data);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
   };
+
+  const sortedBooks = [...books].sort((a, b) => {
+  if (sortBy === "priceLowHigh") {
+    return a.price - b.price;
+  } else if (sortBy === "priceHighLow") {
+    return b.price - a.price;
+  }
+  return 0;
+});
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -91,28 +140,6 @@ const CategoryPage = () => {
                     <li className="flex items-center space-x-2">
                       <input
                         type="radio"
-                        value="newArrivals"
-                        checked={selectedFilter === "newArrivals"}
-                        onChange={() => setSelectedFilter("newArrivals")}
-                        className="mr-2 cursor-pointer"
-                      />
-                      <FaFire className="text-red-500" size={18} />
-                      <label className="text-gray-700">New Arrivals</label>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="bestsellers"
-                        checked={selectedFilter === "bestsellers"}
-                        onChange={() => setSelectedFilter("bestsellers")}
-                        className="mr-2 cursor-pointer"
-                      />
-                      <FaStar className="text-yellow-500" size={18} />
-                      <label className="text-gray-700">Bestsellers</label>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <input
-                        type="radio"
                         value="inStock"
                         checked={selectedFilter === "inStock"}
                         onChange={() => setSelectedFilter("inStock")}
@@ -142,7 +169,7 @@ const CategoryPage = () => {
               <div className="flex justify-between items-center">
                 <h3 className="text-md font-medium mb-2">All Genres</h3>
                 <button
-                onClick={() => setIsGenresOpen(!isGenresOpen)}  // Toggle dropdown
+                onClick={() => setIsGenresOpen(!isGenresOpen)}
                 className="text-gray-500"
               >
                 {isGenresOpen ? (
@@ -185,100 +212,6 @@ const CategoryPage = () => {
               </ul>
               )}
             </div>
-
-            {/* Price Range Box */}
-            <div className="bg-white p-4 shadow rounded-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="text-md font-medium mb-2">Price (NPR)</h3>
-                <button
-                  onClick={() => setIsPriceOpen(!isPriceOpen)}
-                  className="text-gray-500"
-                >
-                  {isPriceOpen ? (
-                    <IoIosArrowUp size={20} />
-                  ) : (
-                    <IoIosArrowDown size={20} />
-                  )}
-                </button>
-              </div>
-              <div
-                className={`transition-all ease-in-out duration-500 overflow-hidden ${
-                  isPriceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                {isPriceOpen && (
-                  <div>
-                    {/* Radio Buttons */}
-                    <div className="space-y-2">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="0-500"
-                          checked={selectedPriceOption === "0-500"}
-                          onChange={() => setSelectedPriceOption("0-500")}
-                          className="mr-2"
-                        />
-                        0 - 500
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="500-1200"
-                          checked={selectedPriceOption === "500-1200"}
-                          onChange={() => setSelectedPriceOption("500-1200")}
-                          className="mr-2"
-                        />
-                        500 - 1200
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="moreThan1200"
-                          checked={selectedPriceOption === "moreThan1200"}
-                          onChange={() => setSelectedPriceOption("moreThan1200")}
-                          className="mr-2"
-                        />
-                        More than 1200
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="custom"
-                          checked={selectedPriceOption === "custom"}
-                          onChange={() => setSelectedPriceOption("custom")}
-                          className="mr-2"
-                        />
-                        Custom
-                      </label>
-                    </div>
-
-                    {/* Custom Range Slider */}
-                    {selectedPriceOption === "custom" && (
-                      <div className="mt-4">
-                        <label
-                          htmlFor="customRange"
-                          className="text-sm text-gray-600 block"
-                        >
-                          Custom Price Range
-                        </label>
-                        <Slider
-                          range
-                          min={0}
-                          max={5000}
-                          defaultValue={priceRange}
-                          onChange={handleCustomPriceChange}
-                          className="mt-2"
-                        />
-                        <div className="flex justify-between text-sm mt-2">
-                          <span>{priceRange[0]}</span>
-                          <span>{priceRange[1]}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </aside>
 
@@ -288,8 +221,8 @@ const CategoryPage = () => {
             {/* Breadcrumb */}
             <div className="text-sm text-gray-600">
               <span className="hover:text-blue-500 cursor-pointer">Home</span> /{" "}
-              <span className="hover:text-blue-500 cursor-pointer">Genres</span> /{" "}
-              <span className="font-semibold">Arts and Photography</span>
+              <span className="hover:text-blue-500 cursor-pointer">Genre</span> /{" "}
+              <span className="font-semibold">{selectedCategory || "All Books"}</span>
             </div>
 
             {/* Sort By */}
@@ -300,28 +233,38 @@ const CategoryPage = () => {
                 <select
                   id="sort"
                   className="border border-gray-300 rounded px-2 py-1 text-gray-700"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                 >
-                  <option>Default</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                  <option value="default">Default</option>
+                  <option value="priceLowHigh">Price: Low to High</option>
+                  <option value="priceHighLow">Price: High to Low</option>
                 </select>
               </div>
           </div>
 
           {/* Books Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-white shadow-lg p-4 rounded-md w-full">
-                <img
-                  src={`https://placeimg.com/300/200/tech?${i}`}
-                  alt={`Book ${i}`}
-                  className="w-full h-48 object-cover mb-4 rounded-md"
-                />
-                <h4 className="font-semibold text-md">Book Title {i + 1}</h4>
-                <p className="text-sm text-gray-600 mt-2">NPR 600</p>
-              </div>
-            ))}
+      {sortedBooks.length > 0 ? (
+        sortedBooks.map((book, i) => (
+          <div
+            key={i}
+            className="bg-white shadow-lg p-4 rounded-md w-full cursor-pointer"
+            onClick={() => navigate(`/book/${book._id}`)} // Navigate on click
+          >
+            <img
+              src={book.image ? `http://localhost:3000/book_images/${book.image}` : "/default-book-cover.jpg"}
+              alt={book.title}
+              className="w-full h-50 object-cover mb-4 rounded-md"
+            />
+            <h4 className="font-semibold text-md">{book.title}</h4>
+            <p className="text-xl text-gray-700 mt-2">Rs{book.price}</p>
           </div>
+        ))
+      ) : (
+        <p>No books found in this category.</p>
+      )}
+    </div>
         </main>
       </div>
 
