@@ -24,7 +24,7 @@ const ManageBooks = () => {
 
   const deleteBook = async (id) => {
     if (!window.confirm("Are you sure you want to delete this book?")) return;
-    
+
     try {
       await axios.delete(`${API_URL}/${id}`);
       setBookList(bookList.filter((book) => book._id !== id));
@@ -35,12 +35,12 @@ const ManageBooks = () => {
 
   return (
     <div className="p-8 bg-gray-50 flex-grow">
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 h-[450px] overflow-y-auto">
         <h3 className="text-2xl font-semibold text-[#1E2751] mb-6">Manage Books</h3>
 
         <table className="min-w-full table-auto">
           <thead>
-            <tr className="bg-gray-100 text-left">
+            <tr className="bg-gray-100 text-left top-0 z-10">
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Title</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Author</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Status</th>
@@ -53,22 +53,23 @@ const ManageBooks = () => {
                 <td className="px-6 py-4">{book.title}</td>
                 <td className="px-6 py-4">{book.author}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                    book.availability_status ? "bg-green-500 text-white" : "bg-red-500 text-white"
-                  }`}>
-                    {book.availability_status ? "Available" : "Checked Out"}
+                  <span
+                    className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                      book.availability_status === "yes"
+                        ? "bg-green-500 text-white"
+                        : "bg-red-500 text-white"
+                    }`}
+                  >
+                    {book.availability_status === "yes" ? "In Stock" : "Out of Stock"}
                   </span>
                 </td>
                 <td className="px-6 py-4 flex">
-                  {/* Edit Button */}
                   <button
                     className="text-blue-600 hover:text-blue-800 mr-4"
                     onClick={() => navigate(`/admin/update-book/${book._id}`)}
                   >
                     <FaEdit className="text-xl" />
                   </button>
-
-                  {/* Delete Button */}
                   <button
                     onClick={() => deleteBook(book._id)}
                     className="text-red-600 hover:text-red-800"
