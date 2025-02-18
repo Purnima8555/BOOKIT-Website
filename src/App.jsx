@@ -21,6 +21,9 @@ import Profile from "./pages/Profile.jsx";
 import BestSellersPage from "./pages/BestSeller.jsx";
 import NewArrivalsPage from "./pages/NewArrival.jsx";
 import NotificationPage from "./pages/Notification.jsx";
+import TermsAndConditions from "./pages/auth/Terms&Condition.jsx";
+import BookRequest from "./pages/BookRequest.jsx";
+import UserForm from "./pages/admin/UserForm.jsx";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +31,7 @@ const router = createBrowserRouter([
     element: <LoginRegister />,
   },
   {
-    path: "/forgotpwd",
+    path: "/password-reset",
     element: <ForgotPassword />,
   },
   {
@@ -44,8 +47,12 @@ const router = createBrowserRouter([
     element: <FavoritesPage />,
   },
   {
-    path: "/category",
+    path: "/genre",
     element: <CategoryPage />,
+  },
+  {
+    path: "/genre/:genre",
+    element: < CategoryPage />
   },
   {
     path: "/contact-us",
@@ -72,6 +79,14 @@ const router = createBrowserRouter([
     element: <NotificationPage />,
   },
   {
+    path: "/terms-and-conditions",
+    element: <TermsAndConditions />,
+  },
+  {
+    path: "/bookRequest",
+    element: <BookRequest />,
+  },
+  {
     path: "/admin",
     element: <Admin />,
     children: [
@@ -82,6 +97,10 @@ const router = createBrowserRouter([
       {
         path: "users",
         element: <Users />,
+      },
+      {
+        path: "userForm",
+        element: <UserForm />,
       },
       {
         path: "orders",
