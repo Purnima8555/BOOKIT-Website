@@ -8,22 +8,22 @@ import ManageBooks from "./pages/admin/ManageBooks.jsx";
 import Orders from "./pages/admin/Order.jsx";
 import Requests from "./pages/admin/Requests.jsx";
 import Settings from "./pages/admin/Settings.jsx";
+import UserForm from "./pages/admin/UserForm.jsx";
 import Users from "./pages/admin/Users.jsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import LoginRegister from "./pages/auth/LoginRegister.jsx";
+import TermsAndConditions from "./pages/auth/TermsandCondition.jsx";
+import BestSellersPage from "./pages/BestSeller.jsx";
+import BookRequest from "./pages/BookRequest.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import FavoritesPage from "./pages/Favorite.jsx";
-import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import Homepage from "./pages/HomePage.jsx";
-import Profile from "./pages/Profile.jsx";
-import BestSellersPage from "./pages/BestSeller.jsx";
 import NewArrivalsPage from "./pages/NewArrival.jsx";
 import NotificationPage from "./pages/Notification.jsx";
-import TermsAndConditions from "./pages/auth/Terms&Condition.jsx";
-import BookRequest from "./pages/BookRequest.jsx";
-import UserForm from "./pages/admin/UserForm.jsx";
+import Profile from "./pages/Profile.jsx";
 
 const router = createBrowserRouter([
   {

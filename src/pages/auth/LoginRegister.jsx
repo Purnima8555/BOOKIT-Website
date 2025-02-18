@@ -1,11 +1,11 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { FaEnvelope, FaLock, FaPhoneAlt, FaUser } from "react-icons/fa";
-import Header from "../../components/Header.jsx";
-import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
-import TermsAndConditions from "./Terms&Condition.jsx"; // Updated import
+import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header.jsx";
 import "../css/LoginRegister.css";
+import TermsAndConditions from "./TermsandCondition.jsx"; // Updated import
 
 Modal.setAppElement("#root");
 
