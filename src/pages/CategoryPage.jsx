@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { FaBookOpen, FaRegClock } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import { FaCamera, FaRegBuilding, FaChild, FaTheaterMasks, FaSchool, FaMagic, FaGhost, FaSearch, FaHeart, FaRocket, FaUsers } from 'react-icons/fa';
+import {
+  FaCamera,
+  FaRegBuilding,
+  FaChild,
+  FaTheaterMasks,
+  FaSchool,
+  FaMagic,
+  FaGhost,
+  FaSearch,
+  FaHeart,
+  FaRocket,
+  FaUsers,
+} from "react-icons/fa";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; // Add useParams
 import Footer from "../components/Footer.jsx";
 import Header from "../components/Header.jsx";
 
@@ -11,25 +23,28 @@ const CategoryPage = () => {
   const [isFilterByOpen, setIsFilterByOpen] = useState(true);
   const [isGenresOpen, setIsGenresOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const { genre } = useParams(); // Get genre from URL
+  const [selectedCategory, setSelectedCategory] = useState(genre || null); // Set initial category from URL
   const [books, setBooks] = useState([]);
   const [sortBy, setSortBy] = useState("default");
   const [favorites, setFavorites] = useState({});
   const navigate = useNavigate();
 
+  console.log("genre:", genre);
+
   const categories = [
-    { name: 'Art & Photography', icon: <FaCamera className="text-yellow-500" size={18} /> },
-    { name: 'Biography', icon: <FaBookOpen className="text-gray-700" size={18} /> },
-    { name: 'Business', icon: <FaRegBuilding className="text-green-500" size={18} /> },
-    { name: 'Children', icon: <FaChild className="text-pink-500" size={18} /> },
-    { name: 'Drama', icon: <FaTheaterMasks className="text-purple-500" size={18} /> },
-    { name: 'Educational', icon: <FaSchool className="text-blue-500" size={18} /> },
-    { name: 'Fantasy', icon: <FaMagic className="text-orange-500" size={18} /> },
-    { name: 'Horror', icon: <FaGhost className="text-gray-600" size={18} /> },
-    { name: 'Mystery', icon: <FaSearch className="text-teal-500" size={18} /> },
-    { name: 'Romance', icon: <FaHeart className="text-red-500" size={18} /> },
-    { name: 'Science', icon: <FaRocket className="text-indigo-500" size={18} /> },
-    { name: 'Self-help', icon: <FaUsers className="text-green-600" size={18} /> },
+    { name: "Art & Photography", icon: <FaCamera className="text-yellow-500" size={18} /> },
+    { name: "Biography", icon: <FaBookOpen className="text-gray-700" size={18} /> },
+    { name: "Business", icon: <FaRegBuilding className="text-green-500" size={18} /> },
+    { name: "Children", icon: <FaChild className="text-pink-500" size={18} /> },
+    { name: "Drama", icon: <FaTheaterMasks className="text-purple-500" size={18} /> },
+    { name: "Educational", icon: <FaSchool className="text-blue-500" size={18} /> },
+    { name: "Fantasy", icon: <FaMagic className="text-orange-500" size={18} /> },
+    { name: "Horror", icon: <FaGhost className="text-gray-600" size={18} /> },
+    { name: "Mystery", icon: <FaSearch className="text-teal-500" size={18} /> },
+    { name: "Romance", icon: <FaHeart className="text-red-500" size={18} /> },
+    { name: "Science", icon: <FaRocket className="text-indigo-500" size={18} /> },
+    { name: "Self-help", icon: <FaUsers className="text-green-600" size={18} /> },
   ];
 
   useEffect(() => {
@@ -65,16 +80,26 @@ const CategoryPage = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        let url = selectedCategory
-          ? `http://localhost:3000/api/books/genre/${selectedCategory}`
+        // Normalize genre from URL to match category names
+        const normalizedGenre = genre
+          ? categories.find(
+              (cat) =>
+                cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-") === genre.toLowerCase()
+            )?.name
+          : null;
+        
+        setSelectedCategory(normalizedGenre || null);
+
+        let url = normalizedGenre
+          ? `http://localhost:3000/api/books/genre/${normalizedGenre}`
           : "http://localhost:3000/api/books/";
         const response = await axios.get(url);
         let filteredBooks = response.data;
 
         if (selectedFilter === "inStock") {
-          filteredBooks = filteredBooks.filter(book => book.availability_status === "yes");
+          filteredBooks = filteredBooks.filter((book) => book.availability_status === "yes");
         } else if (selectedFilter === "outOfStock") {
-          filteredBooks = filteredBooks.filter(book => book.availability_status === "no");
+          filteredBooks = filteredBooks.filter((book) => book.availability_status === "no");
         }
 
         setBooks(filteredBooks);
@@ -84,7 +109,7 @@ const CategoryPage = () => {
     };
 
     fetchBooks();
-  }, [selectedFilter, selectedCategory]);
+  }, [selectedFilter, genre]); // Depend on genre from URL
 
   const toggleFavorite = async (bookId, e) => {
     e.stopPropagation();
@@ -118,7 +143,7 @@ const CategoryPage = () => {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setFavorites(prev => ({ ...prev, [bookId]: false }));
+          setFavorites((prev) => ({ ...prev, [bookId]: false }));
         }
       } else {
         await axios.post(
@@ -131,7 +156,7 @@ const CategoryPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setFavorites(prev => ({ ...prev, [bookId]: true }));
+        setFavorites((prev) => ({ ...prev, [bookId]: true }));
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -151,6 +176,8 @@ const CategoryPage = () => {
   const handleSelect = async (category) => {
     setSelectedCategory(category);
     setIsGenresOpen(false);
+    // Update URL to reflect selected category
+    navigate(`/genre/${category.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`);
   };
 
   return (
@@ -230,7 +257,7 @@ const CategoryPage = () => {
                 <div className="mt-4">
                   <p className="text-sm font-semibold mb-2">Selected Genre:</p>
                   <div className="flex items-center space-x-3 mt-2">
-                    {categories.find(category => category.name === selectedCategory)?.icon}
+                    {categories.find((category) => category.name === selectedCategory)?.icon}
                     <span className="text-gray-700 font-bold">{selectedCategory}</span>
                   </div>
                   <div className="my-4 border-t border-gray-300"></div>
@@ -243,9 +270,9 @@ const CategoryPage = () => {
                     <li
                       key={category.name}
                       onClick={() => handleSelect(category.name)}
-                      className={`flex items-center space-x-2 cursor-pointer
-                      ${selectedCategory === category.name ? 'text-gray-700 font-bold' : 'text-gray-700'}
-                      hover:text-blue-500 hover:font-bold`}
+                      className={`flex items-center space-x-2 cursor-pointer ${
+                        selectedCategory === category.name ? "text-gray-700 font-bold" : "text-gray-700"
+                      } hover:text-blue-500 hover:font-bold`}
                     >
                       {category.icon}
                       <span>{category.name}</span>
@@ -291,18 +318,22 @@ const CategoryPage = () => {
                   onClick={() => navigate(`/book/${book._id}`)}
                 >
                   <img
-                    src={book.image ? `http://localhost:3000/book_images/${book.image}` : "/default-book-cover.jpg"}
+                    src={
+                      book.image
+                        ? `http://localhost:3000/book_images/${book.image}`
+                        : "/default-book-cover.jpg"
+                    }
                     alt={book.title}
                     className="w-full h-50 object-cover mb-4 rounded-md"
                   />
                   <div
                     className={`absolute top-6 right-6 p-2 rounded-full border-2 transition-colors ${
-                      favorites[book._id] ? 'bg-white border-gray-400' : 'bg-[#1E2751] border-[#1E2751]'
+                      favorites[book._id] ? "bg-white border-gray-400" : "bg-[#1E2751] border-[#1E2751]"
                     }`}
                     onClick={(e) => toggleFavorite(book._id, e)}
                   >
                     <FaHeart
-                      className={`h-5 w-5 ${favorites[book._id] ? 'text-red-500' : 'text-white'}`}
+                      className={`h-5 w-5 ${favorites[book._id] ? "text-red-500" : "text-white"}`}
                     />
                   </div>
                   <h4 className="font-semibold text-md">{book.title}</h4>
