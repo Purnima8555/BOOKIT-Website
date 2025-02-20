@@ -15,7 +15,7 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [userRole, setUserRole] = useState(null); // New state for role
+  const [userRole, setUserRole] = useState(null);
   let dropdownTimeout;
 
   const genres = [
@@ -131,7 +131,7 @@ const Header = () => {
       {/* Section 2: Navigation */}
       <nav className={`header-section nav-section ${isMenuOpen ? "open" : ""}`}>
         <ul className="nav-links">
-          <li><a onClick={handleHomeClick}>Home</a></li>
+          <li><a href="/">Home</a></li>
           <li
             className="genre-dropdown"
             onMouseEnter={handleMouseEnter}
