@@ -1,16 +1,21 @@
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, CreditCard, Calendar, Lock, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../App.css";
 import Footer from "../components/Footer.jsx";
 import Header from "../components/Header.jsx";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("cod"); // Default to Cash on Delivery
+  const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
+  const [popupPaymentMethod, setPopupPaymentMethod] = useState("card"); // Default to Credit Card in popup
+  const [isOrderSummaryVisible, setIsOrderSummaryVisible] = useState(false); // Hidden by default
+  const navigate = useNavigate();
 
-  // Fetch cart items on mount
   useEffect(() => {
     const fetchCart = async () => {
       const userId = localStorage.getItem("userId");
@@ -26,10 +31,9 @@ const CartPage = () => {
         const response = await axios.get(`http://localhost:3000/api/cart/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCartItems(response.data || []); // Ensure empty array if no data
+        setCartItems(response.data || []);
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          // Handle 404 as an empty cart
           setCartItems([]);
         } else {
           setError(err.response?.data?.message || "Error fetching cart items");
@@ -46,7 +50,7 @@ const CartPage = () => {
     if (item.type === "purchase") {
       return item.purchasePrice;
     } else {
-      return item.rentalPrice * (item.rentalDays / 7); // Price per week × weeks
+      return item.rentalPrice * (item.rentalDays / 7);
     }
   };
 
@@ -62,8 +66,85 @@ const CartPage = () => {
     }
   };
 
+  const handleContinueShopping = () => {
+    if (cartItems.length > 0) {
+      const firstBookId = cartItems[0].book_id._id;
+      navigate(`/book/${firstBookId}`); // Adjusted to match BuyNow.jsx route
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleCheckout = async () => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    if (!userId || !token) {
+      alert("Please log in to proceed with checkout.");
+      return;
+    }
+
+    const orderData = {
+      user_id: userId,
+      items: cartItems.map(item => ({
+        book_id: item.book_id._id,
+        quantity: item.quantity,
+        type: item.type,
+        rentalDays: item.rentalDays,
+      })),
+      deliveryFee: cartItems.length > 0 ? 100 : 0,
+      total: subtotal + (cartItems.length > 0 ? 100 : 0),
+      paymentMethod: paymentMethod === "cod" ? "cod" : popupPaymentMethod,
+    };
+
+    if (paymentMethod === "online") {
+      setIsCheckoutPopupOpen(true);
+    } else {
+      try {
+        const response = await axios.post("http://localhost:3000/api/orders", orderData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert(`Order placed successfully! Payment Status: ${response.data.paymentStatus}`);
+        navigate("/genre", { state: { orderId: response.data.order_id, paymentStatus: response.data.paymentStatus } });
+      } catch (error) {
+        console.error("Error placing order:", error);
+        alert(`Failed to place order: ${error.response?.data?.message || "Please try again."}`);
+      }
+    }
+  };
+
+  const handlePaymentSubmission = async () => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    const orderData = {
+      user_id: userId,
+      items: cartItems.map(item => ({
+        book_id: item.book_id._id,
+        quantity: item.quantity,
+        type: item.type,
+        rentalDays: item.rentalDays,
+      })),
+      deliveryFee: cartItems.length > 0 ? 100 : 0,
+      total: subtotal + (cartItems.length > 0 ? 100 : 0),
+      paymentMethod: popupPaymentMethod === "card" ? "online" : "esewa",
+    };
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/orders", orderData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert(`Order placed successfully! Payment Status: ${response.data.paymentStatus}`);
+      setIsCheckoutPopupOpen(false);
+      navigate("/genre", { state: { orderId: response.data.order_id, paymentStatus: response.data.paymentStatus } });
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert(`Failed to place order: ${error.response?.data?.message || "Please try again."}`);
+    }
+  };
+
   const subtotal = cartItems.reduce((sum, item) => sum + calculateItemPrice(item) * item.quantity, 0);
-  const deliveryFee = cartItems.length > 0 ? 100 : 0; // No fee if cart is empty
+  const deliveryFee = cartItems.length > 0 ? 100 : 0;
   const total = subtotal + deliveryFee;
 
   if (loading) {
@@ -97,7 +178,10 @@ const CartPage = () => {
       <main className="flex-grow py-12">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
-            <button className="group flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <button
+              onClick={handleContinueShopping}
+              className="group flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+            >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               Continue Shopping
             </button>
@@ -117,8 +201,8 @@ const CartPage = () => {
                     Start adding books to your cart now!
                   </p>
                   <button
-                    onClick={() => window.location.href = "/"} // Redirect to homepage
-                    className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    onClick={() => navigate("/")}
+                    className="mt-4 bg-[#1E2751] hover:bg-[#2E4A78] text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Shop Now
                   </button>
@@ -138,7 +222,6 @@ const CartPage = () => {
                         />
                       </div>
                       <div className="flex-1 flex gap-4">
-                        {/* Left Container: Book Details */}
                         <div className="flex-1">
                           <h3 className="text-xl font-bold text-gray-800">{item.book_id.title}</h3>
                           <p className="text-gray-600 mt-1">by {item.book_id.author}</p>
@@ -149,9 +232,7 @@ const CartPage = () => {
                             Rental Price: Rs {item.rentalPrice.toFixed(0)}/week
                           </p>
                         </div>
-                        {/* Right Containers: Status & Total */}
                         <div className="flex flex-col gap-4 w-1/3">
-                          {/* Status and Quantity/Weeks Container */}
                           <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <p className="text-gray-600">
                               Status: {item.type === "purchase" ? "Purchase" : "Rent"}
@@ -162,7 +243,6 @@ const CartPage = () => {
                                 : `Rental Weeks: ${Math.round(item.rentalDays / 7)}`}
                             </p>
                           </div>
-                          {/* Total Price Container */}
                           <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <p className="text-gray-800 font-semibold">
                               Total: Rs {(calculateItemPrice(item) * item.quantity).toFixed(0)}
@@ -201,7 +281,24 @@ const CartPage = () => {
                         <span>Rs {total.toFixed(0)}</span>
                       </div>
                     </div>
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                    <div className="mt-4">
+                      <label htmlFor="payment-method" className="block text-gray-700 font-semibold mb-2">
+                        Payment Method
+                      </label>
+                      <select
+                        id="payment-method"
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E2751]"
+                      >
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="online">Online Payment</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={handleCheckout}
+                      className="w-full bg-[#1E2751] hover:bg-[#2E4A78] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                    >
                       Checkout Now
                     </button>
                   </div>
@@ -211,6 +308,174 @@ const CartPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Checkout Popup for Online Payment */}
+      {isCheckoutPopupOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 mt-8 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[605px] overflow-y-auto">
+            {/* Header */}
+            <div className="p-4 text-white" style={{ backgroundColor: "#1E2751" }}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">Complete Your Purchase</h2>
+                <button
+                  onClick={() => setIsCheckoutPopupOpen(false)}
+                  className="text-white hover:text-gray-200 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Hidable Order Summary */}
+            <div className="p-4 border-b">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-lg">Order Summary</h3>
+                <button
+                  onClick={() => setIsOrderSummaryVisible(!isOrderSummaryVisible)}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  {isOrderSummaryVisible ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+              </div>
+              {isOrderSummaryVisible && (
+                <>
+                  {cartItems.map(item => (
+                    <div key={item._id} className="flex justify-between mb-2">
+                      <span>{item.book_id.title}</span>
+                      <span>Rs {(calculateItemPrice(item) * item.quantity).toFixed(0)}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between mb-2">
+                    <span>Delivery Fee</span>
+                    <span>Rs {deliveryFee.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>Rs {total.toFixed(0)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="p-4 border-b">
+              <h3 className="font-semibold text-lg mb-2">Payment Method</h3>
+              <div className="flex space-x-2 mb-4">
+                <button
+                  className={`px-4 py-2 border rounded ${popupPaymentMethod === "card" ? "bg-blue-50 border-[#1E2751]" : "bg-white"}`}
+                  onClick={() => setPopupPaymentMethod("card")}
+                >
+                  <div className="flex items-center">
+                    <CreditCard size={18} className="mr-2" />
+                    Credit Card
+                  </div>
+                </button>
+                <button
+                  className={`px-4 py-2 border rounded ${popupPaymentMethod === "esewa" ? "bg-blue-50 border-[#1E2751]" : "bg-white"}`}
+                  onClick={() => setPopupPaymentMethod("esewa")}
+                >
+                  <div className="flex items-center">
+                    <span className="font-bold text-green-600">eSewa</span>
+                  </div>
+                </button>
+              </div>
+
+              {/* Credit Card Form */}
+              {popupPaymentMethod === "card" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Card Number
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border rounded"
+                        placeholder="1234 5678 9012 3456"
+                      />
+                      <CreditCard size={18} className="absolute right-3 top-3 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="flex space-x-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Expiry Date
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className="w-full px-4 py-2 border rounded"
+                          placeholder="MM/YY"
+                        />
+                        <Calendar size={18} className="absolute right-3 top-3 text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="w-1/3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        CVV
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border rounded"
+                        placeholder="123"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Name on Card
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2 border rounded"
+                      placeholder="John Smith"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* eSewa QR Code */}
+              {popupPaymentMethod === "esewa" && (
+                <div className="text-center p-2">
+                  <p className="mb-4">Scan the QR code below with eSewa to complete your payment:</p>
+                  <img
+                    src="/src/assets/images/QR.png"
+                    alt="eSewa QR Code"
+                    className="mx-auto w-40 h-40"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <div className="p-4">
+              {popupPaymentMethod === "card" && (
+                <>
+                  <button
+                    onClick={handlePaymentSubmission}
+                    className="w-full bg-[#1E2751] hover:bg-[#2E4A78] text-white py-3 px-4 rounded font-medium flex items-center justify-center"
+                  >
+                    <Lock size={16} className="mr-2" />
+                    Pay Rs {total.toFixed(0)} Securely
+                  </button>
+                  <div className="mt-4 text-center text-sm text-gray-500 flex items-center justify-center">
+                    <Lock size={14} className="mr-1" />
+                    Your payment information is secure
+                  </div>
+                </>
+              )}
+              {popupPaymentMethod === "esewa" && (
+                <button
+                  onClick={handlePaymentSubmission}
+                  className="w-full bg-[#1E2751] hover:bg-[#2E4A78] text-white py-3 px-4 rounded font-medium"
+                >
+                  Confirm Payment via eSewa
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
