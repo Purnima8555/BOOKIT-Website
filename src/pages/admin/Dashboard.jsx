@@ -5,7 +5,7 @@ const Dashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [bookCount, setBookCount] = useState(0);
   const [customerCount, setCustomerCount] = useState(0);
-  const [pendingRequestCount, setPendingRequestCount] = useState(0); // New state for pending requests
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,7 +22,6 @@ const Dashboard = () => {
           throw new Error("Please log in as an admin to view dashboard activity");
         }
 
-        // Fetch all data concurrently
         const [notifResponse, bookCountResponse, customerCountResponse, pendingRequestResponse] = await Promise.all([
           axios.get("http://localhost:3000/api/notifications/all", {
             headers: { Authorization: `Bearer ${token}` },
@@ -58,9 +57,43 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const extractUsernameFromMessage = (message) => {
-    const match = message.match(/User: (\w+),/);
-    return match ? match[1] : "Unknown User";
+  const parseNotification = (notif) => {
+    const message = notif.message;
+
+    // Handle order notifications from placeOrder
+    const orderRegex = /New order #(.+?) placed by (.+?) for "(.+?)"(?: and (\d+) other book\(s\))?\. Total: Rs (\d+\.?\d*)\. Payment: (.+?)\./;
+    const orderMatch = message.match(orderRegex);
+    if (orderMatch) {
+      return {
+        type: "order",
+        orderId: orderMatch[1],
+        user: orderMatch[2],
+        firstBook: orderMatch[3],
+        otherBooks: orderMatch[4] ? parseInt(orderMatch[4], 10) : 0,
+        total: orderMatch[5],
+        paymentMethod: orderMatch[6],
+      };
+    }
+
+    // Handle book request notifications
+    const requestRegex = /New book request awaiting approval: "(.+?)" by (.+?) \(User: (.+?), Request ID: (.+?)\)/;
+    const requestMatch = message.match(requestRegex);
+    if (requestMatch) {
+      return {
+        type: "bookRequest",
+        bookTitle: requestMatch[1],
+        author: requestMatch[2],
+        user: requestMatch[3],
+        requestId: requestMatch[4],
+      };
+    }
+
+    // Fallback for other or old notifications
+    return {
+      type: "unknown",
+      user: "Unknown User",
+      details: "Unknown action",
+    };
   };
 
   const formatTime = (timestamp) => {
@@ -77,7 +110,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-50 flex-grow">
+    <div className="p-2 bg-gray-50 flex-grow">
       {/* Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div className="bg-gradient-to-r from-[#1E2751] to-[#223963] text-white p-6 rounded-xl shadow-lg">
@@ -95,9 +128,9 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="mt-12">
-        <h3 className="text-2xl font-bold text-[#1E2751] mb-6">Recent Activity</h3>
-        <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="mt-8">
+        <h3 className="text-2xl font-bold text-[#1E2751] mb-4">Recent Activity</h3>
+        <div className="bg-white rounded-xl shadow-lg p-6 h-[353px] overflow-y-auto">
           {loading ? (
             <p className="text-center text-gray-600">Loading recent activity...</p>
           ) : error ? (
@@ -106,17 +139,33 @@ const Dashboard = () => {
             <p className="text-center text-gray-600">No recent activity found.</p>
           ) : (
             <ul className="divide-y divide-gray-200">
-              {notifications.map((notif) => (
-                <li key={notif._id} className="py-4 flex justify-between items-center">
-                  <p className="text-gray-700">
-                    User{" "}
-                    <span className="font-bold">{extractUsernameFromMessage(notif.message)}</span>{" "}
-                    requested{" "}
-                    <span className="font-bold">"{notif.relatedId?.title || "Unknown Book"}"</span>.
-                  </p>
-                  <span className="text-sm text-gray-500">{formatTime(notif.createdAt)}</span>
-                </li>
-              ))}
+              {notifications.map((notif) => {
+                const parsed = parseNotification(notif);
+                return (
+                  <li key={notif._id} className="py-4 flex justify-between items-center">
+                    <p className="text-gray-700">
+                      {parsed.type === "order" ? (
+                        <>
+                          Order <span className="font-bold">#{parsed.orderId}</span> placed by{" "}
+                          <span className="font-bold">{parsed.user}</span> for{" "}
+                          <span className="font-bold">"{parsed.firstBook}"</span>
+                          {parsed.otherBooks > 0 ? ` and ${parsed.otherBooks} other book(s)` : ""}.
+                          Total: Rs <span className="font-bold">{parsed.total}</span>, Paid via{" "}
+                          <span className="font-bold">{parsed.paymentMethod}</span>.
+                        </>
+                      ) : parsed.type === "bookRequest" ? (
+                        <>
+                          <span className="font-bold">{parsed.user}</span> requested{" "}
+                          <span className="font-bold">"{parsed.bookTitle}"</span> by {parsed.author}.
+                        </>
+                      ) : (
+                        notif.message // Fallback for unparsed notifications
+                      )}
+                    </p>
+                    <span className="text-sm text-gray-500">{formatTime(notif.createdAt)}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
