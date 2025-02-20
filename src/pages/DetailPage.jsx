@@ -223,12 +223,33 @@ const DetailPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('Cart response:', response.data);
-      alert('Book added to cart successfully!'); // Show alert
-      navigate('/cart'); // Then navigate to /cart
+      alert('Book added to cart successfully!');
+      navigate('/cart');
     } catch (error) {
       console.error('Error adding to cart:', error.response?.data || error.message);
       alert(`Failed to add book to cart: ${error.response?.data?.message || 'Please try again.'}`);
     }
+  };
+
+  // Buy Now Handler
+  const handleBuyNow = () => {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+
+    if (!userId || !token) {
+      alert('Please log in to proceed with buying.');
+      return;
+    }
+
+    const buyData = {
+      user_id: userId,
+      book_id: id,
+      quantity,
+      type: selectedOption === 'rent' ? 'rental' : 'purchase',
+      ...(selectedOption === 'rent' && { rentalDays: rentalWeeks * 7 }),
+    };
+
+    navigate('/buy', { state: buyData });
   };
 
   // Quantity Handlers
@@ -449,7 +470,10 @@ const DetailPage = () => {
                 >
                   <ShoppingCart /> Add to Cart
                 </button>
-                <button className="flex items-center gap-2 border border-[#1E2751] text-[#1E2751] font-bold px-6 py-3 rounded-lg hover:bg-[#E5E7F3] transition">
+                <button
+                  onClick={handleBuyNow}
+                  className="flex items-center gap-2 border border-[#1E2751] text-[#1E2751] font-bold px-6 py-3 rounded-lg hover:bg-[#E5E7F3] transition"
+                >
                   Buy Now <ArrowRight />
                 </button>
               </div>
