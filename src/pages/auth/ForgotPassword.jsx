@@ -2,7 +2,7 @@ import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useState } from "react";
 import { FaEnvelope, FaKey, FaLock } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer.jsx";
 import Header from "../../components/Header.jsx";
 
@@ -14,7 +14,7 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleNextStep = async () => {
     setError("");
@@ -54,8 +54,13 @@ const ForgotPassword = () => {
         code: verificationCode,
         newPassword,
       });
+
+      // Clear local storage
+      localStorage.clear();
+
+      // Show alert and navigate to loginRegister
       alert("Password reset successfully! Please log in with your new password.");
-      navigate('/loginRegister'); // Navigate to /loginRegister on success
+      navigate("/loginRegister");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to reset password. Please try again.");
     } finally {
