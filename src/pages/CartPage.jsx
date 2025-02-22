@@ -10,10 +10,10 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("cod"); // Default to Cash on Delivery
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
-  const [popupPaymentMethod, setPopupPaymentMethod] = useState("card"); // Default to Credit Card in popup
-  const [isOrderSummaryVisible, setIsOrderSummaryVisible] = useState(false); // Hidden by default
+  const [popupPaymentMethod, setPopupPaymentMethod] = useState("card");
+  const [isOrderSummaryVisible, setIsOrderSummaryVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const CartPage = () => {
   const handleContinueShopping = () => {
     if (cartItems.length > 0) {
       const firstBookId = cartItems[0].book_id._id;
-      navigate(`/book/${firstBookId}`); // Adjusted to match BuyNow.jsx route
+      navigate(`/book/${firstBookId}`);
     } else {
       navigate("/");
     }
