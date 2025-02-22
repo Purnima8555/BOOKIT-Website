@@ -159,7 +159,7 @@ const Dashboard = () => {
                           <span className="font-bold">"{parsed.bookTitle}"</span> by {parsed.author}.
                         </>
                       ) : (
-                        notif.message // Fallback for unparsed notifications
+                        notif.message
                       )}
                     </p>
                     <span className="text-sm text-gray-500">{formatTime(notif.createdAt)}</span>
