@@ -9,7 +9,7 @@ const Orders = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updatedStatus, setUpdatedStatus] = useState(""); // Track status change in popup
+  const [updatedStatus, setUpdatedStatus] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const Orders = () => {
     const order = orders.find(o => o.id === orderId);
     if (order) {
       setSelectedOrder(order);
-      setUpdatedStatus(order.status); // Initialize with current status
+      setUpdatedStatus(order.status);
       setShowForm(true);
     } else {
       console.error("Order not found in state!");
@@ -80,7 +80,7 @@ const Orders = () => {
       setOrders(orders.map(order => 
         order.id === selectedOrder.id ? { ...order, status: updatedStatus } : order
       ));
-      setSelectedOrder({ ...selectedOrder, status: updatedStatus }); // Update popup view
+      setSelectedOrder({ ...selectedOrder, status: updatedStatus });
       alert("Order status updated successfully!");
     } catch (err) {
       console.error("Error updating order status:", err);

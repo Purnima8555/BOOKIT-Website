@@ -15,7 +15,7 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom"; // Add useParams
+import { useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer.jsx";
 import Header from "../components/Header.jsx";
 
@@ -23,8 +23,8 @@ const CategoryPage = () => {
   const [isFilterByOpen, setIsFilterByOpen] = useState(true);
   const [isGenresOpen, setIsGenresOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
-  const { genre } = useParams(); // Get genre from URL
-  const [selectedCategory, setSelectedCategory] = useState(genre || null); // Set initial category from URL
+  const { genre } = useParams();
+  const [selectedCategory, setSelectedCategory] = useState(genre || null);
   const [books, setBooks] = useState([]);
   const [sortBy, setSortBy] = useState("default");
   const [favorites, setFavorites] = useState({});

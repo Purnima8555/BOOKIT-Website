@@ -10,7 +10,7 @@ const NewArrivalsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [favorites, setFavorites] = useState({});
-  const [ratings, setRatings] = useState({}); // New state for ratings
+  const [ratings, setRatings] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const NewArrivalsPage = () => {
         const booksResponse = await axios.get("http://localhost:3000/api/books/new/newbooks");
         const books = booksResponse.data;
         setNewBooks(books);
-        return books; // Return books for further processing
+        return books;
       } catch (error) {
         console.error("Error fetching new books:", error);
         setError("Failed to load books.");
@@ -43,7 +43,7 @@ const NewArrivalsPage = () => {
 
         const favMap = {};
         favResponse.data.favorites.forEach((fav) => {
-          favMap[fav.book_id] = true; // Adjusted to match your improved backend response
+          favMap[fav.book_id] = true;
         });
         setFavorites(favMap);
       } catch (error) {
@@ -62,7 +62,7 @@ const NewArrivalsPage = () => {
             ratingsMap[book._id] = response.data.averageRating || "N/A";
           } catch (error) {
             console.error(`Error fetching rating for book ${book._id}:`, error);
-            ratingsMap[book._id] = "N/A"; // Default to "N/A" if no rating or error
+            ratingsMap[book._id] = "N/A";
           }
         })
       );

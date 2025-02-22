@@ -9,7 +9,7 @@ const Users = () => {
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch data from the backend when the component mounts
+  // Fetch data
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/customer")

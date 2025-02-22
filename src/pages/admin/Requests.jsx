@@ -127,7 +127,7 @@ const Requests = () => {
                           ? "bg-green-500 text-white"
                           : request.status === "rejected"
                           ? "bg-red-500 text-white"
-                          : "bg-blue-500 text-white" // For "fulfilled"
+                          : "bg-blue-500 text-white"
                       }`}
                     >
                       {request.status.charAt(0).toUpperCase() + request.status.slice(1)}

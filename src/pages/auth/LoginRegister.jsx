@@ -5,7 +5,7 @@ import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header.jsx";
 import "../css/LoginRegister.css";
-import TermsAndConditions from "./TermsandCondition.jsx"; // Updated import
+import TermsAndConditions from "./TermsandCondition.jsx";
 
 Modal.setAppElement("#root");
 
