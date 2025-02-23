@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaHeart, FaRegUserCircle, FaSearch, FaCaretDown } from "react-icons/fa";
-import { HiMiniShoppingBag } from "react-icons/hi2";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { FaCaretDown, FaHeart, FaRegUserCircle, FaSearch } from "react-icons/fa";
+import { HiMiniShoppingBag } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
 import "./css/Header.css";
 
 const Header = () => {
@@ -46,6 +46,10 @@ const Header = () => {
 
     const handleHomeClick = () => {
         navigate("/");
+    };
+
+    const handleFavoritesClick = () => {
+        navigate("/favorite");
     };
 
     // Handle mouse enter (show instantly)
@@ -94,8 +98,8 @@ const Header = () => {
                         )}
                     </li>
 
-                    <li><a href="#new">New Arrivals</a></li>
-                    <li><a href="#best">Best Selling</a></li>
+                    <li><a href="/newArrivals">New Arrivals</a></li>
+                    <li><a href="/bestSeller">Best Selling</a></li>
                     <li><a href="#contact">Contact Us</a></li>
                 </ul>
             </nav>
@@ -108,7 +112,7 @@ const Header = () => {
                 <div className="icon-circle">
                     <HiMiniShoppingBag className="icon" />
                 </div>
-                <div className="icon-circle">
+                <div className="icon-circle" onClick={handleFavoritesClick}>
                     <FaHeart className="icon" />
                 </div>
 
@@ -118,22 +122,22 @@ const Header = () => {
                         Sign In <FaRegUserCircle className="user-icon" />
                     </button>
                 ) : (
-                // Show Profile Picture inside a div when logged in
-                <div className="profile-container" onClick={handleSignInClick}>
-                    {selectedUser?.image ? (
-                        <img
-                        src={
-                        selectedUser.imagePreview
-                            ? selectedUser.imagePreview
-                            : `http://localhost:3000/profilePicture/${selectedUser.image}`
-                        }
-                        alt="User"
-                        className="profile-pic"
-                        />
-                    ) : (
-                    <FaRegUserCircle className="user-icon" />
-                    )}
-                </div>
+                    // Show Profile Picture inside a div when logged in
+                    <div className="profile-container" onClick={handleSignInClick}>
+                        {selectedUser?.image ? (
+                            <img
+                                src={
+                                    selectedUser.imagePreview
+                                        ? selectedUser.imagePreview
+                                        : `http://localhost:3000/profilePicture/${selectedUser.image}`
+                                }
+                                alt="User"
+                                className="profile-pic"
+                            />
+                        ) : (
+                            <FaRegUserCircle className="user-icon" />
+                        )}
+                    </div>
                 )}
             </div>
         </header>

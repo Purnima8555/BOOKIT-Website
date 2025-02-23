@@ -18,6 +18,9 @@ import FavoritesPage from "./pages/Favorite.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import Homepage from "./pages/HomePage.jsx";
 import Profile from "./pages/Profile.jsx";
+import BestSellersPage from "./pages/BestSeller.jsx";
+import NewArrivalsPage from "./pages/NewArrival.jsx";
+import NotificationPage from "./pages/Notification.jsx";
 
 const router = createBrowserRouter([
   {
@@ -53,8 +56,20 @@ const router = createBrowserRouter([
     element: <DetailPage />,
   },
   {
-    path: "profile",
+    path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/newArrivals",
+    element: <NewArrivalsPage />,
+  },
+  {
+    path: "/bestSeller",
+    element: <BestSellersPage />,
+  },
+  {
+    path: "/notifications",
+    element: <NotificationPage />,
   },
   {
     path: "/admin",

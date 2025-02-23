@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import { Star, ShoppingCart, ArrowRight } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Star } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { FaHeart } from 'react-icons/fa';
-import Header from '../components/Header';
+import { useParams } from 'react-router-dom';
 import Footer from '../components/Footer';
-import BookCard from '../components/BookCard';
+import Header from '../components/Header';
 
 const DetailPage = () => {
-  const { id } = useParams(); // Get the book ID from the URL parameters
+  const { id } = useParams();
   const [selectedOption, setSelectedOption] = useState('purchase');
   const [rentalDays, setRentalDays] = useState(7);
   const [quantity, setQuantity] = useState(1);
@@ -21,7 +20,7 @@ const DetailPage = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [user, setUser] = useState(null);
-  const [userDetails, setUserDetails] = useState({});
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   const description = book?.description || '';
 
   const toggleDescription = () => {
@@ -34,17 +33,62 @@ const DetailPage = () => {
       .get(`http://localhost:3000/api/books/${id}`)
       .then((response) => {
         setBook(response.data);
-        getAverageRating(); // Fetch average rating when book details are fetched
+        getAverageRating();
       })
       .catch((error) => {
         console.error('Error fetching book details:', error);
       });
   }, [id]);
 
-  // Fetch average rating for the book
+  // Check favorite status
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (userId && token && id) {
+        try {
+          const response = await axios.get(
+            `http://localhost:3000/api/favorites/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          
+          const isBookFavorited = response.data.some(fav => 
+            fav.book_id._id === id && fav.isFavorite
+          );
+          setIsFavorited(isBookFavorited);
+        } catch (error) {
+          console.error('Error checking favorite status:', error);
+        }
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [id]);
+
+  // Fetch user details
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      axios
+        .get(`http://localhost:3000/api/customer/${userId}`)
+        .then((response) => {
+          setUser(response.data);
+        })
+        .catch((error) => {
+          console.error('Error fetching user details:', error);
+        });
+    }
+  }, []);
+
+  // Fetch average rating
   const getAverageRating = () => {
     axios
-      .get(`http://localhost:3000/api/feedback/average-rating/${id}`) 
+      .get(`http://localhost:3000/api/feedback/average-rating/${id}`)
       .then((response) => {
         setAverageRating(response.data.averageRating);
       })
@@ -53,122 +97,149 @@ const DetailPage = () => {
       });
   };
 
-  // Fetch user details using userId from localStorage
+  // Fetch reviews
   useEffect(() => {
-    const userId = localStorage.getItem('userId'); // Get userId from localStorage
-    if (userId) {
-      axios
-        .get(`http://localhost:3000/api/customer/${userId}`)
-        .then((response) => {
-          setUser(response.data); // Set user info
-        })
-        .catch((error) => {
-          console.error('Error fetching user details:', error);
-        });
-    }
-  }, []);
-
-  const handleSubmitReview = () => {
-  if (rating === 0) {
-    alert("Please provide a rating before submitting.");
-    return;
-  }
-
-  if (!user) {
-    alert("User not found. Please log in first.");
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-  
-  if (!token) {
-    alert("Authentication token not found. Please log in.");
-    return;
-  }
-
-  const reviewData = {
-    user_id: user._id,
-    book_id: id,
-    rating: rating,
-    comment: review,
-  };
-
-  axios
-    .post("http://localhost:3000/api/feedback", reviewData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then(() => {
-      alert("Review submitted successfully!");
-      setRating(0);
-      setReview("");
-      getAverageRating(); // Refresh average rating
-
-      // Fetch reviews again to update the list
-      axios
-        .get(`http://localhost:3000/api/feedback/book/${id}`)
-        .then((response) => {
-          setReviews(response.data); // Update the reviews state with the new list
-        })
-        .catch((error) => {
-          console.error("Error fetching reviews:", error);
-        });
-    })
-    .catch((error) => {
-      console.error("Error submitting review:", error);
-      alert("Failed to submit review. Please try again.");
-    });
-  };
-  
-  // Fetch reviews based on book ID
-  useEffect(() => {
-  axios
-    .get(`http://localhost:3000/api/feedback/book/${id}`)
-    .then((response) => {
-      console.log(response.data); // Check what data you are receiving
-      setReviews(response.data); // Set reviews from API response
-    })
-    .catch((error) => {
-      console.error("Error fetching reviews:", error);
-    });
+    axios
+      .get(`http://localhost:3000/api/feedback/book/${id}`)
+      .then((response) => {
+        setReviews(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching reviews:', error);
+      });
   }, [id]);
 
-  // Function to render stars based on rating
+  const handleSubmitReview = () => {
+    if (rating === 0) {
+      alert('Please provide a rating before submitting.');
+      return;
+    }
+
+    if (!user) {
+      alert('User not found. Please log in first.');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Authentication token not found. Please log in.');
+      return;
+    }
+
+    const reviewData = {
+      user_id: user._id,
+      book_id: id,
+      rating: rating,
+      comment: review,
+    };
+
+    axios
+      .post('http://localhost:3000/api/feedback', reviewData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(() => {
+        alert('Review submitted successfully!');
+        setRating(0);
+        setReview('');
+        getAverageRating();
+        axios
+          .get(`http://localhost:3000/api/feedback/book/${id}`)
+          .then((response) => {
+            setReviews(response.data);
+          })
+          .catch((error) => {
+            console.error('Error fetching reviews:', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error submitting review:', error);
+        alert('Failed to submit review. Please try again.');
+      });
+  };
+
+  const toggleFavorite = async () => {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    
+    if (!userId || !token) {
+      alert('Please log in to favorite books');
+      return;
+    }
+
+    setIsLoadingFavorite(true);
+    try {
+      if (isFavorited) {
+        const favorites = await axios.get(
+          `http://localhost:3000/api/favorites/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        
+        const favoriteToRemove = favorites.data.find(fav => 
+          fav.book_id._id === id && fav.isFavorite
+        );
+        
+        if (favoriteToRemove) {
+          await axios.delete(
+            `http://localhost:3000/api/favorites/${favoriteToRemove._id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setIsFavorited(false);
+        }
+      } else {
+        await axios.post(
+          'http://localhost:3000/api/favorites/',
+          {
+            user_id: userId,
+            book_id: id,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorite status. Please try again.');
+    } finally {
+      setIsLoadingFavorite(false);
+    }
+  };
+
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <Star key={i} fill={i < rating ? 'orange' : 'none'} stroke="orange" className="w-5 h-5" />
     ));
   };
 
-  const toggleFavorite = () => {
-    setIsFavorited(!isFavorited);
+  const getUserName = (review) => {
+    return review.user_id && review.user_id.username ? review.user_id.username : 'Anonymous';
   };
 
-  if (!book || !user) {
+  if (!book) {
     return <div>Loading...</div>;
   }
-
-  const getUserName = (review) => {
-  return review.user_id && review.user_id.username ? review.user_id.username : 'Anonymous';
-};
 
   return (
     <>
       <Header />
       <div className="container mx-auto px-4 py-8 mt-3">
         <div className="grid md:grid-cols-2 gap-4 mb-20">
-          {/* Book Image Section */}
           <div className="flex flex-col items-center">
             <div className="relative">
               <img
-                src={book.image ? `http://localhost:3000/book_images/${book.image}` : "/default-book-cover.jpg"}
+                src={book.image ? `http://localhost:3000/book_images/${book.image}` : '/default-book-cover.jpg'}
                 alt={book.title}
                 className="max-w-full h-[450px] object-cover rounded-lg shadow-lg"
               />
-            
-              {/* Favorite Button */}
               <button
+                disabled={isLoadingFavorite}
                 className={`absolute top-3 right-4 p-2 rounded-full border-2 transition-colors
                   ${isFavorited ? 'bg-white border-gray-400' : 'bg-[#1E2751] border-[#1E2751]'}`}
                 onClick={toggleFavorite}
@@ -181,12 +252,10 @@ const DetailPage = () => {
             </div>
           </div>
 
-          {/* Book Details Section */}
           <div>
             <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
             <h2 className="text-xl text-gray-600 mb-4">{book.author}</h2>
 
-            {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
               <div className="flex text-orange-500">
                 {[...Array(5)].map((_, i) => (
@@ -202,7 +271,6 @@ const DetailPage = () => {
               </span>
             </div>
 
-            {/* Book Info */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4">
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -213,52 +281,46 @@ const DetailPage = () => {
                   <p className="text-sm text-gray-500">ISBN</p>
                   <p className="font-semibold">{book.ISBN}</p>
                 </div>
-              
-              <div className="mt-2">
-                <p className="text-sm text-gray-500">Genres</p>
-                <div className="flex gap-2 mt-1">
-                  {book.genre.map(genre => (
-                    <span
-                      key={genre}
-                      className="bg-blue-200 font-semibold text-xs px-2 py-1 rounded text-blue-800"
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">Genres</p>
+                  <div className="flex flex-wrap gap-2 mt-1 max-w-full">
+                    {book.genre.map(genre => (
+                      <span
+                        key={genre}
+                        className="bg-blue-200 font-semibold text-xs px-2 py-1 rounded text-blue-800 whitespace-nowrap"
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              {/* Availability Status */}
-              <div className="mt-3 flex items-center">
-                <p className="text-sm text-gray-500">Status:</p>
+                <div className="mt-2 flex items-center">
+                  <p className="text-sm text-gray-500">Status:</p>
                   <span
                     className={`ml-2 text-xs font-semibold px-2 py-1 rounded ${
-                    book.availability_status === "yes"
-                    ? "bg-green-200 text-green-800"
-                    : "bg-red-200 text-red-800"
+                      book.availability_status === 'yes'
+                        ? 'bg-green-200 text-green-800'
+                        : 'bg-red-200 text-red-800'
                     }`}
-                    >
-                    {book.availability_status === "yes" ? "In Stock" : "Out of Stock"}
+                  >
+                    {book.availability_status === 'yes' ? 'In Stock' : 'Out of Stock'}
                   </span>
-
-                  {/* Discount Tag */}
                   {book.hasDiscount && (
                     <span className="ml-3 text-xs font-semibold px-2 py-1 rounded bg-yellow-200 text-yellow-800">
                       {book.discount_percent}% Off
                     </span>
                   )}
+                </div>
               </div>
             </div>
-          </div>
 
-            {/* Description */}
             <div className="relative">
               <p
                 className={`text-gray-700 overflow-hidden ${!isExpanded ? 'line-clamp-7' : ''}`}
-                style={{ WebkitLineClamp: !isExpanded ? 7 : 'none', display: '-webkit-box', WebkitBoxOrient: 'vertical' }}
+                style={{ WebkitLineClamp: !isExpanded ? 6 : 'none', display: '-webkit-box', WebkitBoxOrient: 'vertical' }}
               >
                 {description}
               </p>
-              {/* Button to toggle full description */}
               {!isExpanded && description.length > 200 && (
                 <div className="text-right">
                   <button
@@ -269,7 +331,6 @@ const DetailPage = () => {
                   </button>
                 </div>
               )}
-              
               {isExpanded && (
                 <div className="text-right">
                   <button
@@ -282,7 +343,6 @@ const DetailPage = () => {
               )}
             </div>
 
-            {/* Purchase/Rental Options */}
             <div className="mb-4">
               <div className="flex gap-4 mb-4">
                 <label className="flex items-center gap-2">
@@ -320,7 +380,6 @@ const DetailPage = () => {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="flex gap-4">
                 <button className="flex items-center gap-2 bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition">
                   <ShoppingCart /> Add to Cart
@@ -333,24 +392,23 @@ const DetailPage = () => {
           </div>
         </div>
 
-        {/* Rate & Review Section */}
         <div className="mt-12 bg-gray-100 p-6 rounded-lg shadow-lg border border-gray-300">
           <h2 className="text-2xl font-semibold mb-4 text-center">Rate & Review</h2>
           <div className="w-4/5 mx-auto">
             <div className="flex items-center gap-3 mb-4">
               <img
-                src={user.image ? `http://localhost:3000/profilePicture/${user.image}` : "/default-book-cover.jpg"}
+                src={user?.image ? `http://localhost:3000/profilePicture/${user.image}` : '/default-book-cover.jpg'}
                 alt={'ProfilePic'}
                 className="w-12 h-12 rounded-full border border-gray-300"
               />
               <div className="flex flex-col ml-3">
-                <p className="font-semibold">{user?.username || "User"}</p>
+                <p className="font-semibold">{user?.username || 'User'}</p>
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       fill={i < hoverRating ? 'orange' : 'none'}
-                      stroke='orange'
+                      stroke="orange"
                       className="w-6 h-6 cursor-pointer"
                       onMouseEnter={() => setHoverRating(i + 1)}
                       onMouseLeave={() => setHoverRating(rating)}
@@ -375,26 +433,25 @@ const DetailPage = () => {
           </div>
         </div>
 
-        {/* Reviews Section */}
         <div className="container mx-auto py-6 px-4" style={{ width: '90%', outline: '1px solid #E5E7EB', borderRadius: '8px' }}>
-          <h2 className="text-xl font-bold text-gray-900 mb-6 mt-4">Customer Reviews:</h2> {/* Customer Reviews Label */}
-            {reviews.map((review) => (
-          <div key={review._id} className="border-b border-gray-200 pb-8 last:border-b-0">
-            <div className="flex items-start">
-              <img
-                src={review.user_id?.image ? `http://localhost:3000/profilePicture/${review.user_id.image}` : "/default-profile.png"} // Use default if no avatar
-                alt={review.user_id?.username || "User"}
-                className="w-14 h-14 rounded-full mr-4"
-              />
-              <div className="flex-1">
-                <div className="flex items-center mb-2">
-                  <h3 className="font-semibold text-lg text-gray-900 mr-3">{getUserName(review)}</h3>
+          <h2 className="text-xl font-bold text-gray-900 mb-6 mt-4">Customer Reviews:</h2>
+          {reviews.map((review) => (
+            <div key={review._id} className="border-b border-gray-200 pb-8 last:border-b-0">
+              <div className="flex items-start">
+                <img
+                  src={review.user_id?.image ? `http://localhost:3000/profilePicture/${review.user_id.image}` : '/default-profile.png'}
+                  alt={review.user_id?.username || 'User'}
+                  className="w-14 h-14 rounded-full mr-4"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center mb-2">
+                    <h3 className="font-semibold text-lg text-gray-900 mr-3">{getUserName(review)}</h3>
                     <div className="flex">{renderStars(review.rating)}</div>
-                </div>
+                  </div>
                   <p className="text-gray-800 text-base">{review.comment}</p>
+                </div>
               </div>
             </div>
-          </div>
           ))}
         </div>
       </div>

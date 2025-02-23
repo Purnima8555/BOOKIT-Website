@@ -1,40 +1,115 @@
+import axios from 'axios';
 import { Book, Heart, ShoppingCart, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Footer from "../components/Footer.jsx";
 import Header from "../components/Header.jsx";
-import nineteenEightyFour from '../assets/book_images/1984.jpg';
-import theGreatGatsby from '../assets/book_images/thegreatgatsby.jpg';
 
 const FavoritesPage = () => {
-  const [favorites, setFavorites] = useState([
-    {
-      id: 1,
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      cover: theGreatGatsby,
-      price: 24.99,
-      isAvailable: true,
-    },
-    {
-      id: 2,
-      title: "1984",
-      author: "George Orwell",
-      cover: nineteenEightyFour,
-      price: 19.99,
-      isAvailable: false,
-    },
-  ]);
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const removeFromFavorites = (id) => {
-    setFavorites(favorites.filter((book) => book.id !== id));
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+
+      if (!userId || !token) {
+        setError('Please log in to view favorites');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/favorites/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const formattedFavorites = response.data.map(fav => ({
+          id: fav._id,
+          title: fav.book_id.title,
+          author: fav.book_id.author,
+          cover: fav.book_id.image ? `http://localhost:3000/book_images/${fav.book_id.image}` : '/default-book-cover.jpg',
+          price: fav.book_id.price,
+          isAvailable: fav.book_id.availability_status === 'yes',
+        }));
+
+        setFavorites(formattedFavorites);
+        setLoading(false);
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          setFavorites([]);
+          setLoading(false);
+        } else {
+          console.error('Error fetching favorites:', err);
+          setError('Failed to load favorites. Please try again.');
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  const removeFromFavorites = async (id) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      alert('Please log in to remove favorites');
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/favorites/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setFavorites(favorites.filter((book) => book.id !== id));
+    } catch (err) {
+      console.error('Error removing favorite:', err);
+      alert('Failed to remove favorite. Please try again.');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-6xl mx-auto px-4 py-6 flex justify-center items-center">
+          <p className="text-xl text-gray-600">Loading favorites...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-6xl mx-auto px-4 py-6 flex justify-center items-center">
+          <p className="text-xl text-red-500">{error}</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-2xl shadow-lg pt-4 px-8 pb-8">
           <div className="flex items-center gap-3 mb-8 border-b pb-6">
             <Heart className="text-red-500 w-8 h-8" />
             <h1 className="text-3xl font-bold text-gray-800">My Favorites</h1>
@@ -58,12 +133,12 @@ const FavoritesPage = () => {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{book.title}</h2>
                     <p className="text-gray-600 text-lg mb-2">{book.author}</p>
-                    <p className="text-2xl font-bold text-blue-600">${book.price}</p>
+                    <p className="text-xl font-semibold text-gray-600">Rs {book.price}</p>
                   </div>
 
                   <div className="flex gap-4 mt-4">
                     {book.isAvailable ? (
-                      <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-sm">
+                      <button className="flex items-center gap-2 bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition-colors duration-300 shadow-sm">
                         <ShoppingCart className="w-5 h-5" />
                         Add to Cart
                       </button>
@@ -99,7 +174,6 @@ const FavoritesPage = () => {
           )}
         </div>
       </main>
-
       <Footer />
     </div>
   );

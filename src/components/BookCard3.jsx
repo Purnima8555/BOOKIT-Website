@@ -7,7 +7,7 @@ const BookCard3 = ({ title, author, img, price, discount_percent, onClick }) => 
   const discountedPrice = price - (price * (discount_percent / 100));
   
   return (
-    <div className="deal-card">
+    <div className="deal-card transform transition-transform duration-100 hover:scale-105">
       {/* Discount Badge */}
       <div className="book-card3" onClick={onClick} style={{ cursor: "pointer" }}>
       {discount_percent > 0 && (
