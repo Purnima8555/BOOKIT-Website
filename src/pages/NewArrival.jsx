@@ -10,43 +10,73 @@ const NewArrivalsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [favorites, setFavorites] = useState({});
+  const [ratings, setRatings] = useState({}); // New state for ratings
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBooksAndFavorites = async () => {
+    const fetchBooks = async () => {
       try {
         const booksResponse = await axios.get("http://localhost:3000/api/books/new/newbooks");
-        setNewBooks(booksResponse.data);
-
-        const userId = localStorage.getItem("userId");
-        const token = localStorage.getItem("token");
-
-        if (userId && token) {
-          const favResponse = await axios.get(
-            `http://localhost:3000/api/favorites/${userId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-
-          const favMap = {};
-          favResponse.data.forEach((fav) => {
-            if (fav.isFavorite) {
-              favMap[fav.book_id._id] = true;
-            }
-          });
-          setFavorites(favMap);
-        }
-
-        setLoading(false);
+        const books = booksResponse.data;
+        setNewBooks(books);
+        return books; // Return books for further processing
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching new books:", error);
         setError("Failed to load books.");
-        setLoading(false);
+        return [];
       }
     };
 
-    fetchBooksAndFavorites();
+    const fetchFavorites = async () => {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!userId || !token) return;
+
+      try {
+        const favResponse = await axios.get(
+          `http://localhost:3000/api/favorites/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const favMap = {};
+        favResponse.data.favorites.forEach((fav) => {
+          favMap[fav.book_id] = true; // Adjusted to match your improved backend response
+        });
+        setFavorites(favMap);
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
+    };
+
+    const fetchRatings = async (books) => {
+      const ratingsMap = {};
+      await Promise.all(
+        books.map(async (book) => {
+          try {
+            const response = await axios.get(
+              `http://localhost:3000/api/feedback/average-rating/${book._id}`
+            );
+            ratingsMap[book._id] = response.data.averageRating || "N/A";
+          } catch (error) {
+            console.error(`Error fetching rating for book ${book._id}:`, error);
+            ratingsMap[book._id] = "N/A"; // Default to "N/A" if no rating or error
+          }
+        })
+      );
+      setRatings(ratingsMap);
+    };
+
+    const loadData = async () => {
+      setLoading(true);
+      const books = await fetchBooks();
+      await Promise.all([fetchFavorites(), fetchRatings(books)]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   const toggleFavorite = async (bookId, e) => {
@@ -65,13 +95,13 @@ const NewArrivalsPage = () => {
     try {
       if (isCurrentlyFavorited) {
         const response = await axios.get(
-          `http://localhost:3000/api/favorites/${userId}`,
+          `http://localhost:3000/api/favorites/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        const favoriteToRemove = response.data.find(
-          (fav) => fav.book_id._id === bookId && fav.isFavorite
+        const favoriteToRemove = response.data.favorites.find(
+          (fav) => fav.book_id === bookId
         );
 
         if (favoriteToRemove) {
@@ -81,10 +111,10 @@ const NewArrivalsPage = () => {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setFavorites(prev => ({ ...prev, [bookId]: false }));
+          setFavorites((prev) => ({ ...prev, [bookId]: false }));
         }
       } else {
-        await axios.post(
+        const response = await axios.post(
           "http://localhost:3000/api/favorites/",
           {
             user_id: userId,
@@ -94,7 +124,7 @@ const NewArrivalsPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setFavorites(prev => ({ ...prev, [bookId]: true }));
+        setFavorites((prev) => ({ ...prev, [bookId]: true }));
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -132,7 +162,7 @@ const NewArrivalsPage = () => {
             {newBooks.map((book) => (
               <div
                 key={book._id}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 cursor-pointer relative border border-gray-300" // Added border
+                className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 cursor-pointer relative border border-gray-300"
                 onClick={() => navigate(`/book/${book._id}`)}
               >
                 <div className="flex flex-col md:flex-row h-full">
@@ -165,7 +195,9 @@ const NewArrivalsPage = () => {
                         <h3 className="text-xl font-bold text-gray-900">{book.title}</h3>
                         <div className="flex items-center">
                           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                          <span className="ml-1 text-gray-600">{book.rating || "N/A"}</span>
+                          <span className="ml-1 text-gray-600">
+                            {ratings[book._id] !== undefined ? ratings[book._id] : "N/A"}
+                          </span>
                         </div>
                       </div>
                       <p className="text-gray-600 mb-2">by {book.author}</p>
@@ -192,7 +224,7 @@ const NewArrivalsPage = () => {
 
                     {/* Pricing and Actions */}
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border border-gray-300"> {/* Added border */}
+                      <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border border-gray-300">
                         <div>
                           <span className="text-sm text-gray-600">Purchase</span>
                           <p className="font-bold text-gray-800">Rs. {book.price}</p>
@@ -201,7 +233,7 @@ const NewArrivalsPage = () => {
                           Buy Now
                         </button>
                       </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border border-gray-300"> {/* Added border */}
+                      <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border border-gray-300">
                         <div>
                           <span className="text-sm text-gray-600">Rent</span>
                           <p className="font-bold text-gray-800">Rs. {book.rental_price}/day</p>

@@ -5,10 +5,23 @@
     align-items: center;
     justify-content: space-between;
     background-color: #ffffff;
-    padding: 10px 50px;
+    padding: 10px 20px;
+    /* Reduced padding for smaller screens */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     height: 65px;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    /* Hidden on desktop */
+    cursor: pointer;
+}
+
+.hamburger .icon {
+    font-size: 24px;
+    color: #1E2751;
 }
 
 /* Logo Section */
@@ -17,7 +30,6 @@
     align-items: center;
     gap: 8px;
     flex: 1;
-    /* background-color: #1E2751; */
 }
 
 .logo {
@@ -28,7 +40,6 @@
     background-color: #1E2751;
 }
 
-/* Gradient Text Hover Effect */
 .website-name {
     font-size: 24px;
     font-weight: bold;
@@ -99,7 +110,6 @@
     transition: transform 0.3s ease;
 }
 
-/* Hover effect for the dropdown icon */
 .nav-links li a:hover .dropdown-icon {
     transform: rotate(180deg);
 }
@@ -111,7 +121,6 @@
     align-items: center;
     justify-content: flex-end;
     gap: 25px;
-    /* background-color: aqua; */
 }
 
 /* Icons Inside Circle */
@@ -198,7 +207,6 @@
     padding-bottom: 5px;
 }
 
-/* Custom scrollbar for Chrome/Edge */
 .dropdown-menu::-webkit-scrollbar {
     width: 6px;
 }
@@ -227,25 +235,151 @@
     background-color: #cfcfd3;
 }
 
-/* profile pic */
-.profile-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
+/* Profile Pic */
 .profile-pic {
-    width: 45px;
-    height: 45px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #706c6c;
-    transition: transform 0.2s ease-in-out, border-color 0.2s ease;
 }
 
-.profile-pic:hover {
-    transform: scale(1.1);
-    border-color: #1E2751;
-    /* Blue border on hover */
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .header {
+        padding: 10px 15px;
+        /* Reduce padding on tablets */
+    }
+
+    .nav-links {
+        gap: 20px;
+        /* Reduce gap between nav items */
+    }
+
+    .user-options {
+        gap: 15px;
+        /* Reduce gap between icons */
+    }
+
+    .icon-circle {
+        height: 35px;
+        width: 35px;
+        /* Slightly smaller icons */
+    }
+
+    .website-name {
+        font-size: 20px;
+        /* Smaller logo text */
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px;
+    }
+
+    .hamburger {
+        display: flex;
+        /* Show hamburger on mobile */
+        align-items: center;
+        order: 1;
+    }
+
+    .logo-section {
+        flex: 0;
+        order: 2;
+    }
+
+    .nav-section {
+        display: none;
+        /* Hide nav by default on mobile */
+        width: 100%;
+        order: 4;
+    }
+
+    .nav-section.open {
+        display: block;
+        /* Show when menu is open */
+        background-color: #fff;
+        position: absolute;
+        top: 65px;
+        left: 0;
+        width: 100%;
+        padding: 10px 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .nav-links li a {
+        font-size: 18px;
+    }
+
+    .genre-dropdown {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        position: static;
+        transform: none;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        max-height: 200px;
+    }
+
+    .user-options {
+        order: 3;
+        gap: 10px;
+    }
+
+    .icon-circle {
+        height: 30px;
+        width: 30px;
+    }
+
+    .signin-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        height: 40px;
+        width: 40px;
+    }
+
+    .website-name {
+        font-size: 18px;
+    }
+
+    .user-options {
+        gap: 8px;
+    }
+
+    .icon-circle {
+        height: 25px;
+        width: 25px;
+    }
+
+    .icon-circle .icon {
+        font-size: 16px;
+    }
+
+    .signin-btn {
+        padding: 5px 6px;
+        font-size: 10px;
+    }
+
+    .user-icon {
+        font-size: 16px;
+    }
 }

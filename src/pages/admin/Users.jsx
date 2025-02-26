@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaRegIdCard, FaTrashAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch data from the backend when the component mounts
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/customer")
       .then((response) => {
-        // Set the fetched data to the state
         setUsers(response.data);
       })
       .catch((error) => {
@@ -21,23 +22,36 @@ const Users = () => {
   }, []);
 
   // Function to handle deleting a user by ID
-  const handleDelete = (userId) => {
-    console.log("Deleting user with ID:", userId);
+  const handleDelete = async (userId) => {
     if (!userId) {
       console.error("User ID is missing!");
       return;
     }
 
-    axios
-      .delete(`http://localhost:3000/api/customer/${userId}`)
-      .then((response) => {
-        // Remove the deleted user from the state
-        setUsers(users.filter((user) => user._id !== userId));
-        console.log("User deleted successfully", response);
-      })
-      .catch((error) => {
-        console.error("There was an error deleting the user!", error);
+    // Add confirmation prompt
+    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found. Please log in.");
+      }
+
+      const response = await axios.delete(`http://localhost:3000/api/customer/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      console.log("User deleted successfully:", response.data);
+      // Update the state to remove the deleted user
+      setUsers(users.filter((user) => user._id !== userId));
+    } catch (error) {
+      console.error("There was an error deleting the user:", error.response || error);
+      alert(error.response?.data?.message || "Failed to delete user. Please try again.");
+    }
   };
 
   // Function to handle viewing a user by ID
@@ -55,20 +69,20 @@ const Users = () => {
 
   // Close the view form
   const closeForm = () => {
-    setShowForm(false); // Hide the form
-    setSelectedUser(null); // Clear the selected user data
+    setShowForm(false);
+    setSelectedUser(null);
   };
 
   return (
     <div className="p-8 bg-gray-50 flex-grow">
       {/* Users List Section */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 h-[450px] overflow-y-auto">
         <h3 className="text-2xl font-semibold text-[#1E2751] mb-6">Users</h3>
 
         {/* User Table */}
         <table className="min-w-full table-auto">
           <thead>
-            <tr className="bg-gray-100 text-left">
+            <tr className="bg-gray-100 text-left top-0 z-10">
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Full Name</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Email</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-700">Role</th>
@@ -94,13 +108,13 @@ const Users = () => {
                     className="text-blue-600 hover:text-blue-800"
                     onClick={() => handleView(user._id)}
                   >
-                    <FaRegIdCard  className="inline-block mr-2" size={20} />
+                    <FaRegIdCard className="inline-block mr-2" size={20} />
                   </button>
                   <button
                     className="ml-4 text-red-600 hover:text-red-800"
                     onClick={() => handleDelete(user._id)}
                   >
-                    <FaTrashAlt  className="inline-block mr-2" size={20} />
+                    <FaTrashAlt className="inline-block mr-2" size={20} />
                   </button>
                 </td>
               </tr>
@@ -111,7 +125,10 @@ const Users = () => {
 
       {/* Add User Button */}
       <div className="mt-6 flex justify-end">
-        <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">
+        <button
+          onClick={() => navigate("/admin/userForm")}
+          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
+        >
           Add New User
         </button>
       </div>
@@ -129,7 +146,7 @@ const Users = () => {
                   src={
                     selectedUser.imagePreview
                       ? selectedUser.imagePreview
-                      : `http://localhost:3000/profilePicture/${selectedUser.image}` // Fetch image from server
+                      : `http://localhost:3000/profilePicture/${selectedUser.image}`
                   }
                   alt="User"
                   className="w-24 h-24 object-cover border-2 border-gray-300"

@@ -1,15 +1,16 @@
 import axios from 'axios';
-import { ArrowRight, ShoppingCart, Star } from 'lucide-react';
+import { ArrowRight, MinusCircle, PlusCircle, ShoppingCart, Star } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { FaHeart } from 'react-icons/fa';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 
 const DetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState('purchase');
-  const [rentalDays, setRentalDays] = useState(7);
+  const [rentalWeeks, setRentalWeeks] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -50,14 +51,10 @@ const DetailPage = () => {
         try {
           const response = await axios.get(
             `http://localhost:3000/api/favorites/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           
-          const isBookFavorited = response.data.some(fav => 
+          const isBookFavorited = response.data.some(fav =>
             fav.book_id._id === id && fav.isFavorite
           );
           setIsFavorited(isBookFavorited);
@@ -135,9 +132,7 @@ const DetailPage = () => {
 
     axios
       .post('http://localhost:3000/api/feedback', reviewData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
         alert('Review submitted successfully!');
@@ -173,34 +168,25 @@ const DetailPage = () => {
       if (isFavorited) {
         const favorites = await axios.get(
           `http://localhost:3000/api/favorites/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         
-        const favoriteToRemove = favorites.data.find(fav => 
+        const favoriteToRemove = favorites.data.find(fav =>
           fav.book_id._id === id && fav.isFavorite
         );
         
         if (favoriteToRemove) {
           await axios.delete(
             `http://localhost:3000/api/favorites/${favoriteToRemove._id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           setIsFavorited(false);
         }
       } else {
         await axios.post(
           'http://localhost:3000/api/favorites/',
-          {
-            user_id: userId,
-            book_id: id,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { user_id: userId, book_id: id },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setIsFavorited(true);
       }
@@ -210,6 +196,57 @@ const DetailPage = () => {
     } finally {
       setIsLoadingFavorite(false);
     }
+  };
+
+  // Add to Cart Handler
+  const handleAddToCart = async () => {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+
+    if (!userId || !token) {
+      alert('Please log in to add items to your cart.');
+      return;
+    }
+
+    const cartData = {
+      user_id: userId,
+      book_id: id,
+      quantity,
+      type: selectedOption === 'rent' ? 'rental' : 'purchase',
+      ...(selectedOption === 'rent' && { rentalDays: rentalWeeks * 7 }),
+    };
+
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/api/cart/add',
+        cartData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('Cart response:', response.data);
+      alert('Book added to cart successfully!'); // Show alert
+      navigate('/cart'); // Then navigate to /cart
+    } catch (error) {
+      console.error('Error adding to cart:', error.response?.data || error.message);
+      alert(`Failed to add book to cart: ${error.response?.data?.message || 'Please try again.'}`);
+    }
+  };
+
+  // Quantity Handlers
+  const increaseQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decreaseQuantity = () => {
+    setQuantity(prev => Math.max(1, prev - 1));
+  };
+
+  // Rental Weeks Handlers
+  const increaseRentalWeeks = () => {
+    setRentalWeeks(prev => prev + 1);
+  };
+
+  const decreaseRentalWeeks = () => {
+    setRentalWeeks(prev => Math.max(1, prev - 1));
   };
 
   const renderStars = (rating) => {
@@ -363,25 +400,53 @@ const DetailPage = () => {
                     onChange={() => setSelectedOption('rent')}
                     className="text-blue-600"
                   />
-                  <span>Rent (Rs {book.rental_price}/day)</span>
+                  <span>Rent (Rs {book.rental_price}/week)</span>
                 </label>
               </div>
 
-              {selectedOption === 'rent' && (
+              {selectedOption === 'purchase' && (
                 <div className="flex items-center gap-2 mb-4">
+                  <button onClick={decreaseQuantity} className="hover:text-blue-600">
+                    <MinusCircle className="w-5 h-5" />
+                  </button>
                   <input
                     type="number"
                     min="1"
-                    value={rentalDays}
-                    onChange={(e) => setRentalDays(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-20 px-2 py-1 border rounded"
+                    value={quantity}
+                    readOnly
+                    className="w-20 px-2 py-1 border rounded text-center"
                   />
-                  <span>Rental Days</span>
+                  <button onClick={increaseQuantity} className="hover:text-blue-600">
+                    <PlusCircle className="w-5 h-5" />
+                  </button>
+                  <span>Quantity</span>
+                </div>
+              )}
+
+              {selectedOption === 'rent' && (
+                <div className="flex items-center gap-2 mb-4">
+                  <button onClick={decreaseRentalWeeks} className="hover:text-blue-600">
+                    <MinusCircle className="w-5 h-5" />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    value={rentalWeeks}
+                    readOnly
+                    className="w-20 px-2 py-1 border rounded text-center"
+                  />
+                  <button onClick={increaseRentalWeeks} className="hover:text-blue-600">
+                    <PlusCircle className="w-5 h-5" />
+                  </button>
+                  <span>Rental Weeks</span>
                 </div>
               )}
 
               <div className="flex gap-4">
-                <button className="flex items-center gap-2 bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition">
+                <button
+                  onClick={handleAddToCart}
+                  className="flex items-center gap-2 bg-[#1E2751] text-white px-6 py-3 rounded-lg hover:bg-[#0e1e67] transition"
+                >
                   <ShoppingCart /> Add to Cart
                 </button>
                 <button className="flex items-center gap-2 border border-[#1E2751] text-[#1E2751] font-bold px-6 py-3 rounded-lg hover:bg-[#E5E7F3] transition">

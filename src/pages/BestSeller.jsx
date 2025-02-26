@@ -13,39 +13,50 @@ const BestSellersPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBestBooksAndFavorites = async () => {
+    const fetchBestBooks = async () => {
       try {
         const booksResponse = await axios.get('http://localhost:3000/api/books/best/bestbooks');
         setBestBooks(booksResponse.data);
-
-        const userId = localStorage.getItem("userId");
-        const token = localStorage.getItem("token");
-
-        if (userId && token) {
-          const favResponse = await axios.get(
-            `http://localhost:3000/api/favorites/${userId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-
-          const favMap = {};
-          favResponse.data.forEach((fav) => {
-            if (fav.isFavorite) {
-              favMap[fav.book_id._id] = true;
-            }
-          });
-          setFavorites(favMap);
-        }
-
-        setLoading(false);
-      } catch (err) {
+      } catch (error) {
+        console.error("Error fetching best books:", error);
         setError("Failed to fetch best-selling books.");
-        setLoading(false);
       }
     };
 
-    fetchBestBooksAndFavorites();
+    const fetchFavorites = async () => {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!userId || !token) return;
+
+      try {
+        const favResponse = await axios.get(
+          `http://localhost:3000/api/favorites/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const favMap = {};
+        favResponse.data.forEach((fav) => {
+          if (fav.isFavorite) {
+            favMap[fav.book_id._id] = true;
+          }
+        });
+        setFavorites(favMap);
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+        // Handle favorites error silently
+      }
+    };
+
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchBestBooks(), fetchFavorites()]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   const toggleFavorite = async (bookId, e) => {
