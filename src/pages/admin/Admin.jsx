@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaChartPie, FaBook, FaUser, FaTruck, FaBell, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaChartPie, FaBook, FaUser, FaTruck, FaBell, FaSignOutAlt } from "react-icons/fa";
 
 const Admin = () => {
   const location = useLocation();
@@ -32,7 +32,6 @@ const Admin = () => {
     { path: "users", label: "Users", icon: <FaUser /> },
     { path: "orders", label: "Orders", icon: <FaTruck /> },
     { path: "requests", label: "Requests", icon: <FaBell /> },
-    { path: "settings", label: "Settings", icon: <FaCog /> },
   ];
 
   return (
@@ -98,7 +97,7 @@ const Admin = () => {
               <img
                 src={`http://localhost:3000/profilePicture/${user.image}`}
                 alt="Admin Avatar"
-                className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 hover:border-blue-500 transition-all"
+                className="w-12 h-12 rounded-full object-cover border-3 border-gray-300 hover:border-gray-500 transition-all"
               />
             ) : (
               <img

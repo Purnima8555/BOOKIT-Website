@@ -4,47 +4,53 @@ import axios from "axios";
 import "../App.css";
 import Footer from "../components/Footer.jsx";
 import Header from "../components/Header.jsx";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const CartPage = () => {
+const BuyNow = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isCheckoutPopupOpen, setIsCheckoutPopupOpen] = useState(false);
   const [popupPaymentMethod, setPopupPaymentMethod] = useState("card");
   const [isOrderSummaryVisible, setIsOrderSummaryVisible] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+  const buyData = location.state || {};
 
   useEffect(() => {
-    const fetchCart = async () => {
-      const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
+    const fetchBookDetails = async () => {
+      const { book_id, quantity, type, rentalDays } = buyData;
 
-      if (!userId || !token) {
-        setError("Please log in to view your cart.");
-        setLoading(false);
+      if (!book_id) {
         return;
       }
 
       try {
-        const response = await axios.get(`http://localhost:3000/api/cart/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCartItems(response.data || []);
-      } catch (err) {
-        if (err.response && err.response.status === 404) {
-          setCartItems([]);
-        } else {
-          setError(err.response?.data?.message || "Error fetching cart items");
-        }
-      } finally {
-        setLoading(false);
+        const response = await axios.get(`http://localhost:3000/api/books/${book_id}`);
+        const book = response.data;
+
+        const cartItem = {
+          _id: `${book_id}-${Date.now()}`,
+          book_id: {
+            _id: book._id,
+            title: book.title,
+            author: book.author,
+            image: book.image,
+          },
+          purchasePrice: book.price,
+          rentalPrice: book.rental_price,
+          quantity: quantity || 1,
+          type: type || "purchase",
+          rentalDays: type === "rental" ? rentalDays || 7 : undefined,
+        };
+
+        setCartItems([cartItem]);
+      } catch (error) {
+        console.error("Error fetching book details:", error);
       }
     };
 
-    fetchCart();
-  }, []);
+    fetchBookDetails();
+  }, [buyData]);
 
   const calculateItemPrice = (item) => {
     if (item.type === "purchase") {
@@ -54,22 +60,14 @@ const CartPage = () => {
     }
   };
 
-  const removeItem = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:3000/api/cart/remove/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCartItems((items) => items.filter((item) => item._id !== id));
-    } catch (err) {
-      console.error("Error removing item:", err);
-    }
+  const removeItem = (id) => {
+    setCartItems((items) => items.filter((item) => item._id !== id));
   };
 
   const handleContinueShopping = () => {
-    if (cartItems.length > 0) {
-      const firstBookId = cartItems[0].book_id._id;
-      navigate(`/book/${firstBookId}`);
+    const { book_id } = buyData;
+    if (book_id) {
+      navigate(`/book/${book_id}`);
     } else {
       navigate("/");
     }
@@ -147,30 +145,6 @@ const CartPage = () => {
   const deliveryFee = cartItems.length > 0 ? 100 : 0;
   const total = subtotal + deliveryFee;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header />
-        <main className="flex-grow py-12">
-          <div className="max-w-6xl mx-auto px-4 text-center">Loading cart...</div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header />
-        <main className="flex-grow py-12">
-          <div className="max-w-6xl mx-auto px-4 text-center text-red-500">{error}</div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -190,15 +164,15 @@ const CartPage = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-grow space-y-6">
               <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
-                <span className="text-gray-500">{cartItems.length} items</span>
+                <h1 className="text-3xl font-bold text-gray-800">Buy Now</h1>
+                <span className="text-gray-500">{cartItems.length} item</span>
               </div>
 
               {cartItems.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-xl text-gray-600">Your cart is empty.</p>
+                  <p className="text-xl text-gray-600">No item selected.</p>
                   <p className="text-gray-500 mt-2">
-                    Start adding books to your cart now!
+                    Please select a book to buy now!
                   </p>
                   <button
                     onClick={() => navigate("/")}
@@ -311,7 +285,7 @@ const CartPage = () => {
 
       {/* Checkout Popup for Online Payment */}
       {isCheckoutPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 mt-8 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 mt-10 z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[605px] overflow-y-auto">
             {/* Header */}
             <div className="p-4 text-white" style={{ backgroundColor: "#1E2751" }}>
@@ -436,8 +410,8 @@ const CartPage = () => {
 
               {/* eSewa QR Code */}
               {popupPaymentMethod === "esewa" && (
-                <div className="text-center p-2">
-                  <p className="mb-4">Scan the QR code below with eSewa to complete your payment:</p>
+                <div className="text-center p-4">
+                  <p className="mb-2">Scan the QR code below with eSewa to complete your payment:</p>
                   <img
                     src="/src/assets/images/QR.png"
                     alt="eSewa QR Code"
@@ -482,4 +456,4 @@ const CartPage = () => {
   );
 };
 
-export default CartPage;
+export default BuyNow;

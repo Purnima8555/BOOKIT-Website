@@ -13,9 +13,9 @@ const NotificationPage = () => {
     switch (type) {
       case "success":
         return <CheckCircle className="w-6 h-6 text-green-500" />;
-      case "alert": // Map "error" to "alert"
+      case "alert":
         return <AlertCircle className="w-6 h-6 text-red-500" />;
-      case "reminder": // Map "warning" to "reminder"
+      case "reminder":
         return <Clock className="w-6 h-6 text-yellow-500" />;
       case "info":
         return <Info className="w-6 h-6 text-blue-500" />;
@@ -61,12 +61,12 @@ const NotificationPage = () => {
 
       try {
         const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId"); // Get userId for debugging
+        const userId = localStorage.getItem("userId");
         if (!token) {
           throw new Error("Please log in to view notifications");
         }
 
-        console.log("Fetching notifications for userId:", userId); // Debug log
+        console.log("Fetching notifications for userId:", userId);
 
         const response = await axios.get("http://localhost:3000/api/notifications/user", {
           headers: {
@@ -74,7 +74,7 @@ const NotificationPage = () => {
           },
         });
 
-        console.log("API Response:", response.data); // Debug log
+        console.log("API Response:", response.data);
 
         const mappedNotifications = response.data.map((notif) => ({
           id: notif._id,
@@ -87,7 +87,7 @@ const NotificationPage = () => {
 
         setNotifications(mappedNotifications);
       } catch (err) {
-        console.error("Error fetching notifications:", err.response || err); // Debug log
+        console.error("Error fetching notifications:", err.response || err);
         setError(err.response?.data?.message || err.message || "Error fetching notifications");
       } finally {
         setLoading(false);
@@ -143,7 +143,7 @@ const NotificationPage = () => {
       }
     );
 
-    console.log("Mark as read response:", response.data); // Debug log
+    console.log("Mark as read response:", response.data);
 
     setNotifications((prev) =>
       prev.map((notif) => (notif.id === id ? { ...notif, unread: false } : notif))

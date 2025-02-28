@@ -8,10 +8,9 @@ const TermsAndConditions = ({ onAgree }) => {
     const checked = e.target.checked;
     setIsAgreed(checked);
     if (checked) {
-      // Wait 1 second before calling onAgree
       setTimeout(() => {
         onAgree(true);
-      }, 1000); // 1000ms = 1 second
+      }, 1000);
     }
   };
 

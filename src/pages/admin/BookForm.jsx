@@ -49,7 +49,7 @@ const BookForm = () => {
     if (name === 'price') {
       const priceValue = parseFloat(value);
       if (!isNaN(priceValue)) {
-        updatedData.rental_price = Math.round(priceValue * 0.05); // Removes decimals
+        updatedData.rental_price = Math.round(priceValue * 0.05);
       }
     }
 
@@ -80,7 +80,7 @@ const BookForm = () => {
       if (key === 'image' && value) {
         formDataToSend.append('file', value);
       } else if (key === 'genre') {
-        formDataToSend.append('genre', JSON.stringify(value)); // Send genres as JSON
+        formDataToSend.append('genre', JSON.stringify(value));
       } else {
         formDataToSend.append(key, value);
       }

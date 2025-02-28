@@ -16,9 +16,9 @@ const BookRequest = () => {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [requestId, setRequestId] = useState(null); // Store request ID from backend
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [requestId, setRequestId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,8 +39,8 @@ const BookRequest = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token"); // Get JWT token from localStorage
-      const userId = localStorage.getItem("userId"); // Get userId from localStorage
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
 
       if (!token || !userId) {
         throw new Error("Please log in to submit a request");
@@ -51,16 +51,16 @@ const BookRequest = () => {
         "http://localhost:3000/api/book-request",
         {
           ...formData,
-          userId, // Add userId to the payload
+          userId,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include JWT token in headers
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      setRequestId(response.data.requestId); // Set requestId from response
+      setRequestId(response.data.requestId);
       setIsSubmitted(true);
 
       setTimeout(() => {

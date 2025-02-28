@@ -7,7 +7,6 @@ import Dashboard from "./pages/admin/Dashboard.jsx";
 import ManageBooks from "./pages/admin/ManageBooks.jsx";
 import Orders from "./pages/admin/Order.jsx";
 import Requests from "./pages/admin/Requests.jsx";
-import Settings from "./pages/admin/Settings.jsx";
 import UserForm from "./pages/admin/UserForm.jsx";
 import Users from "./pages/admin/Users.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
@@ -24,6 +23,7 @@ import Homepage from "./pages/HomePage.jsx";
 import NewArrivalsPage from "./pages/NewArrival.jsx";
 import NotificationPage from "./pages/Notification.jsx";
 import Profile from "./pages/Profile.jsx";
+import BuyNow from "./pages/BuyNow.jsx";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: "/cart",
     element: <CartPage />,
+  },
+  {
+    path: "/buy",
+    element: <BuyNow />,
   },
   {
     path: "/favorite",
@@ -113,10 +117,6 @@ const router = createBrowserRouter([
       {
         path: "requests",
         element: <Requests />,
-      },
-      {
-        path: "settings",
-        element: <Settings />,
       },
       {
       path: "add-book",

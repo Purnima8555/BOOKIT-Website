@@ -7,7 +7,7 @@ import Select from 'react-select';
 const BookForm2 = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    console.log("Book ID from useParams:", id); // Log the ID
+    console.log("Book ID from useParams:", id);
 
     const [book, setBook] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -76,19 +76,19 @@ const BookForm2 = () => {
     formData.append("discount_end", book.discount_end);
     
     if (newImage) {
-        formData.append("file", newImage); // Add the new image to the form data if it exists
+        formData.append("file", newImage);
     }
 
     try {
         const response = await axios.put(`http://localhost:3000/api/books/${id}`, formData, {
             headers: {
-                "Content-Type": "multipart/form-data", // Ensure the correct content type for form data
+                "Content-Type": "multipart/form-data",
             },
         });
 
         console.log("Book updated:", response.data);
         alert('Book updated successfully');
-        navigate('/admin/manage-books'); // Navigate to another route (e.g., book listing page)
+        navigate('/admin/manage-books');
     } catch (error) {
         console.error("Error updating book:", error);
     }
@@ -109,7 +109,7 @@ const BookForm2 = () => {
         const { name, value } = e.target;
         setBook((prevBook) => ({
             ...prevBook,
-            [name]: value, // Dynamically update the correct field
+            [name]: value,
         }));
     };
 
@@ -122,7 +122,7 @@ const BookForm2 = () => {
     const file = e.target.files[0];
     if (file) {
     setNewImage(file);
-    setImagePreview(URL.createObjectURL(file)); // Show preview
+    setImagePreview(URL.createObjectURL(file));
     }
 };
     
