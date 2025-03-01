@@ -73,50 +73,58 @@ const BookForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const formDataToSend = new FormData();
-    for (const [key, value] of Object.entries(formData)) {
-      if (key === 'image' && value) {
-        formDataToSend.append('file', value);
-      } else if (key === 'genre') {
-        formDataToSend.append('genre', JSON.stringify(value));
-      } else {
-        formDataToSend.append(key, value);
+  const formDataToSend = new FormData();
+  for (const [key, value] of Object.entries(formData)) {
+    if (key === 'image' && value) {
+      formDataToSend.append('image', value);
+    } else if (key === 'genre') {
+      formDataToSend.append('genre', JSON.stringify(value));
+    } else {
+      formDataToSend.append(key, value);
+    }
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found. Please log in.');
+    }
+
+    const response = await axios.post('http://localhost:3000/api/books/add', formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token}`
       }
-    }
-
-    try {
-      const response = await axios.post('http://localhost:3000/api/books', formDataToSend, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      console.log(response.data);
-      alert('Book added successfully');
-      setFormData({
-        title: '',
-        author: '',
-        genre: [],
-        price: '',
-        rental_price: '',
-        publisher: '',
-        ISBN: '',
-        description: '',
-        series: '',
-        isAvailable: 'no',
-        available_stock: '',
-        hasDiscount: 'no',
-        discount_type: '',
-        discount_percent: '',
-        discount_start: '',
-        discount_end: '',
-        image: null
-      });
-      setImagePreview(null);
-    } catch (error) {
-      console.error(error);
-      alert('Error adding book');
-    }
-  };
+    });
+    console.log('Book added:', response.data);
+    alert('Book added successfully');
+    setFormData({
+      title: '',
+      author: '',
+      genre: [],
+      price: '',
+      rental_price: '',
+      publisher: '',
+      ISBN: '',
+      description: '',
+      series: '',
+      isAvailable: 'no',
+      available_stock: '',
+      hasDiscount: 'no',
+      discount_type: '',
+      discount_percent: '',
+      discount_start: '',
+      discount_end: '',
+      image: null
+    });
+    setImagePreview(null);
+  } catch (error) {
+    console.error('Error adding book:', error.response?.data || error.message);
+    alert(`Error adding book: ${error.response?.data?.message || error.message}`);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">

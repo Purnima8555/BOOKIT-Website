@@ -16,7 +16,6 @@ import BestSellersPage from "./pages/BestSeller.jsx";
 import BookRequest from "./pages/BookRequest.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
-import ContactUs from "./pages/ContactUs.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import FavoritesPage from "./pages/Favorite.jsx";
 import Homepage from "./pages/HomePage.jsx";
@@ -57,10 +56,6 @@ const router = createBrowserRouter([
   {
     path: "/genre/:genre",
     element: < CategoryPage />
-  },
-  {
-    path: "/contact-us",
-    element: <ContactUs />,
   },
   {
     path: "/book/:id",
